@@ -1,0 +1,27 @@
+{
+    "name": "belka-tech/php-vk-teams-bot",
+    "description": "PHP client for VK Teams Bot API (aka ICQ Bot)",
+    "type": "library",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.2",
+        "psr/http-client": "^1.0",
+        "psr/http-factory": "^1.0",
+        "psr/log": "^2.0 || ^3.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5",
+        "dg/bypass-finals": "^1.9",
+        "phpstan/phpstan": "^2.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "BelkaTech\\VkTeamsBot\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "BelkaTech\\VkTeamsBot\\Test\\": "test/"
+        }
+    }
+}

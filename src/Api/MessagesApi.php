@@ -1,0 +1,325 @@
+<?php
+
+declare(strict_types=1);
+
+namespace BelkaTech\VkTeamsBot\Api;
+
+use BelkaTech\VkTeamsBot\Enum\ParseModeEnum;
+use BelkaTech\VkTeamsBot\Http\HttpClient;
+use BelkaTech\VkTeamsBot\Keyboard\Keyboard;
+use Psr\Http\Client\ClientExceptionInterface;
+
+final readonly class MessagesApi
+{
+    public function __construct(
+        private HttpClient $httpClient,
+        private ParseModeEnum $parseMode,
+    ) {}
+
+    /**
+     * @param list<string|int>|null $forwardMsgId
+     * @param list<list<array{
+     *     text: string,
+     *     url?: string,
+     *     callbackData?: string,
+     *     style?: string,
+     * }>>|Keyboard|null $inlineKeyboardMarkup
+     * @return array{
+     *     ok: bool,
+     *     msgId: string,
+     * }
+     *
+     * @throws ClientExceptionInterface
+     */
+    public function sendText(
+        string $chatId,
+        string $text,
+        string|int|null $replyMsgId = null,
+        ?string $forwardChatId = null,
+        ?array $forwardMsgId = null,
+        array|Keyboard|null $inlineKeyboardMarkup = null,
+        ?object $format = null,
+        ?ParseModeEnum $parseMode = null,
+    ): array {
+        /** @phpstan-ignore return.type */
+        return $this->httpClient->get('/messages/sendText', [
+            'chatId' => $chatId,
+            'text' => $text,
+            'replyMsgId' => $replyMsgId,
+            'forwardChatId' => $forwardChatId,
+            'forwardMsgId' => json_encode($forwardMsgId, flags: JSON_THROW_ON_ERROR),
+            'inlineKeyboardMarkup' => json_encode($inlineKeyboardMarkup, flags: JSON_THROW_ON_ERROR),
+            'format' => $format,
+            'parseMode' => ($parseMode ?? $this->parseMode)->value,
+        ]);
+    }
+
+    /**
+     * @param list<string|int>|null $forwardMsgId
+     * @param list<list<array{
+     *     text: string,
+     *     url?: string,
+     *     callbackData?: string,
+     *     style?: string,
+     * }>>|Keyboard|null $inlineKeyboardMarkup
+     * @return array{
+     *     ok: bool,
+     *     msgId: string,
+     *     fileId?: string,
+     * }
+     *
+     * @throws ClientExceptionInterface
+     */
+    public function sendFile(
+        string $chatId,
+        ?string $fileId = null,
+        ?string $filePath = null,
+        ?string $caption = null,
+        string|int|null $replyMsgId = null,
+        ?string $forwardChatId = null,
+        ?array $forwardMsgId = null,
+        array|Keyboard|null $inlineKeyboardMarkup = null,
+        ?object $format = null,
+        ?ParseModeEnum $parseMode = null,
+    ): array {
+        return $this->sendMedia(
+            '/messages/sendFile',
+            $chatId,
+            $fileId,
+            $filePath,
+            $caption,
+            $replyMsgId,
+            $forwardChatId,
+            $forwardMsgId,
+            $inlineKeyboardMarkup,
+            $format,
+            $parseMode,
+        );
+    }
+
+    /**
+     * @param list<string|int>|null $forwardMsgId
+     * @param list<list<array{
+     *     text: string,
+     *     url?: string,
+     *     callbackData?: string,
+     *     style?: string,
+     * }>>|Keyboard|null $inlineKeyboardMarkup
+     * @return array{
+     *     ok: bool,
+     *     msgId: string,
+     *     fileId?: string,
+     * }
+     *
+     * @throws ClientExceptionInterface
+     */
+    public function sendVoice(
+        string $chatId,
+        ?string $fileId = null,
+        ?string $filePath = null,
+        string|int|null $replyMsgId = null,
+        ?string $forwardChatId = null,
+        ?array $forwardMsgId = null,
+        array|Keyboard|null $inlineKeyboardMarkup = null,
+    ): array {
+        $params = [
+            'chatId' => $chatId,
+            'fileId' => $fileId,
+            'replyMsgId' => $replyMsgId,
+            'forwardChatId' => $forwardChatId,
+            'forwardMsgId' => json_encode($forwardMsgId, flags: JSON_THROW_ON_ERROR),
+            'inlineKeyboardMarkup' => json_encode($inlineKeyboardMarkup, flags: JSON_THROW_ON_ERROR),
+        ];
+
+        if ($filePath !== null) {
+            unset($params['fileId']);
+
+            /** @phpstan-ignore return.type */
+            return $this->httpClient->post(
+                '/messages/sendVoice',
+                $params,
+                $filePath,
+            );
+        }
+
+        /** @phpstan-ignore return.type */
+        return $this->httpClient->get('/messages/sendVoice', $params);
+    }
+
+    /**
+     * @param list<list<array{
+     *     text: string,
+     *     url?: string,
+     *     callbackData?: string,
+     *     style?: string,
+     * }>>|Keyboard|null $inlineKeyboardMarkup
+     * @return array{ok: bool}
+     *
+     * @throws ClientExceptionInterface
+     */
+    public function editText(
+        string $chatId,
+        string|int $msgId,
+        string $text,
+        array|Keyboard|null $inlineKeyboardMarkup = null,
+        ?object $format = null,
+        ?ParseModeEnum $parseMode = null,
+    ): array {
+        /** @phpstan-ignore return.type */
+        return $this->httpClient->get('/messages/editText', [
+            'chatId' => $chatId,
+            'msgId' => $msgId,
+            'text' => $text,
+            'inlineKeyboardMarkup' => json_encode($inlineKeyboardMarkup, flags: JSON_THROW_ON_ERROR),
+            'format' => $format,
+            'parseMode' => ($parseMode ?? $this->parseMode)->value,
+        ]);
+    }
+
+    /**
+     * @param list<string|int> $msgIds
+     * @return array{ok: bool}
+     *
+     * @throws ClientExceptionInterface
+     */
+    public function deleteMessages(
+        string $chatId,
+        array $msgIds,
+    ): array {
+        /** @phpstan-ignore return.type */
+        return $this->httpClient->get('/messages/deleteMessages', [
+            'chatId' => $chatId,
+            'msgIds' => json_encode($msgIds, flags: JSON_THROW_ON_ERROR),
+        ]);
+    }
+
+    /**
+     * @return array{ok: bool}
+     *
+     * @throws ClientExceptionInterface
+     */
+    public function answerCallbackQuery(
+        string $queryId,
+        ?string $text = null,
+        bool $showAlert = false,
+        ?string $url = null,
+    ): array {
+        /** @phpstan-ignore return.type */
+        return $this->httpClient->get('/messages/answerCallbackQuery', [
+            'queryId' => $queryId,
+            'textAnswer' => $text,
+            'showAlert' => $showAlert,
+            'url' => $url,
+        ]);
+    }
+
+    /**
+     * @return array{ok: bool}
+     *
+     * @throws ClientExceptionInterface
+     */
+    public function pinMessage(
+        string $groupOrChannelId,
+        string|int $msgId,
+    ): array {
+        /** @phpstan-ignore return.type */
+        return $this->httpClient->get('/chats/pinMessage', [
+            'groupOrChannelId' => $groupOrChannelId,
+            'msgId' => $msgId,
+        ]);
+    }
+
+    /**
+     * @return array{ok: bool}
+     *
+     * @throws ClientExceptionInterface
+     */
+    public function unpinMessage(
+        string $groupOrChannelId,
+        string|int $msgId,
+    ): array {
+        /** @phpstan-ignore return.type */
+        return $this->httpClient->get('/chats/unpinMessage', [
+            'groupOrChannelId' => $groupOrChannelId,
+            'msgId' => $msgId,
+        ]);
+    }
+
+    /**
+     * @return array{
+     *     ok: bool,
+     *     type: string,
+     *     size: int,
+     *     filename: string,
+     *     url: string,
+     * }
+     *
+     * @throws ClientExceptionInterface
+     */
+    public function filesGetInfo(
+        string $fileId,
+    ): array {
+        /** @phpstan-ignore return.type */
+        return $this->httpClient->get('/files/getInfo', [
+            'fileId' => $fileId,
+        ]);
+    }
+
+    /**
+     * @param list<string|int>|null $forwardMsgId
+     * @param list<list<array{
+     *     text: string,
+     *     url?: string,
+     *     callbackData?: string,
+     *     style?: string,
+     * }>>|Keyboard|null $inlineKeyboardMarkup
+     * @return array{
+     *     ok: bool,
+     *     msgId: string,
+     *     fileId?: string,
+     * }
+     *
+     * @throws ClientExceptionInterface
+     */
+    private function sendMedia(
+        string $endpoint,
+        string $chatId,
+        ?string $fileId,
+        ?string $filePath,
+        ?string $caption,
+        string|int|null $replyMsgId,
+        ?string $forwardChatId,
+        ?array $forwardMsgId,
+        array|Keyboard|null $inlineKeyboardMarkup,
+        ?object $format,
+        ?ParseModeEnum $parseMode,
+    ): array {
+        $params = [
+            'chatId' => $chatId,
+            'caption' => $caption,
+            'replyMsgId' => $replyMsgId,
+            'forwardChatId' => $forwardChatId,
+            'forwardMsgId' => json_encode($forwardMsgId, flags: JSON_THROW_ON_ERROR),
+            'inlineKeyboardMarkup' => json_encode($inlineKeyboardMarkup, flags: JSON_THROW_ON_ERROR),
+            'format' => $format,
+            'parseMode' => ($parseMode ?? $this->parseMode)->value,
+        ];
+
+        if ($filePath !== null) {
+            /** @phpstan-ignore return.type */
+            return $this->httpClient->post(
+                $endpoint,
+                $params,
+                $filePath,
+            );
+        }
+
+        $params['fileId'] = $fileId;
+
+        /** @phpstan-ignore return.type */
+        return $this->httpClient->get(
+            $endpoint,
+            $params,
+        );
+    }
+}

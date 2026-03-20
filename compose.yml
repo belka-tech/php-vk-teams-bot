@@ -1,0 +1,12 @@
+services:
+  php82:
+    container_name: belkatech-php-vk-teams-bot-82
+    build:
+      context: ./
+      dockerfile: .docker/Dockerfile
+      args:
+        PHP_VERSION: "8.2"
+    tty: true
+    working_dir: /app
+    volumes:
+      - ./:/app

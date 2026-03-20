@@ -1,0 +1,11 @@
+/vendor/
+/.phpunit.cache/
+composer.lock
+phpunit.xml
+
+# Common stuff
+/.idea/
+/.vscode/
+*.swp
+*.swo
+.DS_Store
