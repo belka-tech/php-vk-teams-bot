@@ -12,6 +12,7 @@ use TypeError;
 
 final class BotEventListener
 {
+    private bool $isRunning = false;
     private int $lastEventId = 0;
 
     /** @var array<string, list<callable>> */
@@ -79,6 +80,11 @@ final class BotEventListener
         $this->on(EventTypeEnum::CallbackQuery, $handler);
     }
 
+    public function stop(): void
+    {
+        $this->isRunning = false;
+    }
+
     /**
      * @param int $pollTime Maximum polling request duration (1-60 sec)
      */
@@ -91,7 +97,15 @@ final class BotEventListener
             );
         }
 
-        while (true) { /** @phpstan-ignore while.alwaysTrue */
+        if (function_exists('pcntl_signal')) {
+            pcntl_async_signals(true);
+            pcntl_signal(SIGTERM, fn() => $this->stop());
+            pcntl_signal(SIGINT, fn() => $this->stop());
+        }
+
+        $this->isRunning = true;
+
+        while ($this->isRunning) { /** @phpstan-ignore while.alwaysTrue */
             foreach ($this->fetchEvents($pollTime) as $event) {
                 if ($event['type'] === EventTypeEnum::MessageNew->value) {
                     $text = isset($event['payload']['text']) && is_string($event['payload']['text'])

@@ -126,7 +126,13 @@ $botEventListener->onCommand(
 
 // Start long polling (must be called after all handlers are registered)
 $botEventListener->listen(pollTime: 30);
+
+// Stop the listener programmatically (e.g. from a handler)
+$botEventListener->stop();
 ```
+
+If the `pcntl` extension is available, `SIGTERM` and `SIGINT` signals are handled automatically for graceful shutdown.
+Without `pcntl`, use `$botEventListener->stop()` from a handler to stop the loop.
 
 ### Keyboard
 
