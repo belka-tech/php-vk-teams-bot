@@ -152,7 +152,7 @@ final class BotEventListener
                         if (str_starts_with($text, $command)) {
                             $handler($this->bot, $eventDto);
 
-                            continue 3;
+                            continue 2;
                         }
                     }
                 }
