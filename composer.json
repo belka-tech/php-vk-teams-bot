@@ -2,7 +2,7 @@
     "name": "belka-tech/php-vk-teams-bot",
     "description": "PHP client for VK Teams Bot API (aka ICQ Bot)",
     "type": "library",
-    "license": "proprietary",
+    "license": "MIT",
     "require": {
         "php": "^8.2",
         "psr/http-client": "^1.0",
