@@ -31,6 +31,12 @@ final class BotEventListener
         string $command,
         \Closure $handler,
     ): void {
+        if (isset($this->commandHandlers[$command])) {
+            throw new InvalidArgumentException(
+                "Command handler for '{$command}' is already registered",
+            );
+        }
+
         $this->commandHandlers[$command] = $handler;
     }
 
@@ -113,9 +119,11 @@ final class BotEventListener
 
     /**
      * @param int $pollTime Maximum polling request duration (1-60 sec)
+     * @param ?\Closure(\Exception, EventDto): void $onException
      */
     public function listen(
         int $pollTime,
+        ?\Closure $onException = null,
     ): void {
         if ($pollTime < 1 || $pollTime > 60) {
             throw new InvalidArgumentException(
@@ -144,23 +152,36 @@ final class BotEventListener
                     payload: $event['payload'],
                 );
 
-                if ($eventType === EventTypeEnum::MessageNew) {
-                    $text = isset($event['payload']['text']) && is_string($event['payload']['text'])
-                        ? $event['payload']['text']
-                        : '';
-                    foreach ($this->commandHandlers as $command => $handler) {
-                        if (str_starts_with($text, $command)) {
-                            $handler($this->bot, $eventDto);
+                try {
+                    if ($eventType === EventTypeEnum::MessageNew) {
+                        $text = isset($event['payload']['text']) && is_string($event['payload']['text'])
+                            ? $event['payload']['text']
+                            : '';
 
-                            continue 2;
+                        foreach ($this->commandHandlers as $command => $handler) {
+                            if (
+                                $text === $command
+                                || str_starts_with($text, $command . ' ')
+                                || str_starts_with($text, $command . '@')
+                            ) {
+                                $handler($this->bot, $eventDto);
+
+                                continue 2;
+                            }
                         }
                     }
-                }
 
-                if (array_key_exists($eventType->value, $this->handlers)) {
-                    foreach ($this->handlers[$eventType->value] as $handler) {
-                        $handler($this->bot, $eventDto);
+                    if (array_key_exists($eventType->value, $this->handlers)) {
+                        foreach ($this->handlers[$eventType->value] as $handler) {
+                            $handler($this->bot, $eventDto);
+                        }
                     }
+                } catch (\Exception $e) {
+                    if ($onException === null) {
+                        throw $e;
+                    }
+
+                    $onException($e, $eventDto);
                 }
             }
         }

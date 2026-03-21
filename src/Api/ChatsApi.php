@@ -149,11 +149,16 @@ final readonly class ChatsApi
      */
     public function getMembers(
         string $chatId,
+        ?string $cursor = null,
     ): array {
+        $params = ['chatId' => $chatId];
+
+        if ($cursor !== null) {
+            $params['cursor'] = $cursor;
+        }
+
         /** @phpstan-ignore return.type */
-        return $this->httpClient->get('/v1/chats/getMembers', [
-            'chatId' => $chatId,
-        ]);
+        return $this->httpClient->get('/v1/chats/getMembers', $params);
     }
 
     /**
@@ -283,7 +288,7 @@ final readonly class ChatsApi
         string $imagePath,
     ): array {
         /** @phpstan-ignore return.type */
-        return $this->httpClient->post(
+        return $this->httpClient->postMultipart(
             '/v1/chats/avatar/set',
             ['chatId' => $chatId],
             $imagePath,

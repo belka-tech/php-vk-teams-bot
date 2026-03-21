@@ -47,8 +47,8 @@ final readonly class MessagesApi
             'text' => $text,
             'replyMsgId' => $replyMsgId,
             'forwardChatId' => $forwardChatId,
-            'forwardMsgId' => json_encode($forwardMsgId, flags: JSON_THROW_ON_ERROR),
-            'inlineKeyboardMarkup' => json_encode($inlineKeyboardMarkup, flags: JSON_THROW_ON_ERROR),
+            'forwardMsgId' => $forwardMsgId !== null ? json_encode($forwardMsgId, flags: JSON_THROW_ON_ERROR) : null,
+            'inlineKeyboardMarkup' => $inlineKeyboardMarkup !== null ? json_encode($inlineKeyboardMarkup, flags: JSON_THROW_ON_ERROR) : null,
             'format' => $format,
             'parseMode' => ($parseMode ?? $this->parseMode)->value,
         ]);
@@ -127,15 +127,15 @@ final readonly class MessagesApi
             'fileId' => $fileId,
             'replyMsgId' => $replyMsgId,
             'forwardChatId' => $forwardChatId,
-            'forwardMsgId' => json_encode($forwardMsgId, flags: JSON_THROW_ON_ERROR),
-            'inlineKeyboardMarkup' => json_encode($inlineKeyboardMarkup, flags: JSON_THROW_ON_ERROR),
+            'forwardMsgId' => $forwardMsgId !== null ? json_encode($forwardMsgId, flags: JSON_THROW_ON_ERROR) : null,
+            'inlineKeyboardMarkup' => $inlineKeyboardMarkup !== null ? json_encode($inlineKeyboardMarkup, flags: JSON_THROW_ON_ERROR) : null,
         ];
 
         if ($filePath !== null) {
             unset($params['fileId']);
 
             /** @phpstan-ignore return.type */
-            return $this->httpClient->post(
+            return $this->httpClient->postMultipart(
                 '/v1/messages/sendVoice',
                 $params,
                 $filePath,
@@ -170,7 +170,7 @@ final readonly class MessagesApi
             'chatId' => $chatId,
             'msgId' => $msgId,
             'text' => $text,
-            'inlineKeyboardMarkup' => json_encode($inlineKeyboardMarkup, flags: JSON_THROW_ON_ERROR),
+            'inlineKeyboardMarkup' => $inlineKeyboardMarkup !== null ? json_encode($inlineKeyboardMarkup, flags: JSON_THROW_ON_ERROR) : null,
             'format' => $format,
             'parseMode' => ($parseMode ?? $this->parseMode)->value,
         ]);
@@ -299,15 +299,15 @@ final readonly class MessagesApi
             'caption' => $caption,
             'replyMsgId' => $replyMsgId,
             'forwardChatId' => $forwardChatId,
-            'forwardMsgId' => json_encode($forwardMsgId, flags: JSON_THROW_ON_ERROR),
-            'inlineKeyboardMarkup' => json_encode($inlineKeyboardMarkup, flags: JSON_THROW_ON_ERROR),
+            'forwardMsgId' => $forwardMsgId !== null ? json_encode($forwardMsgId, flags: JSON_THROW_ON_ERROR) : null,
+            'inlineKeyboardMarkup' => $inlineKeyboardMarkup !== null ? json_encode($inlineKeyboardMarkup, flags: JSON_THROW_ON_ERROR) : null,
             'format' => $format,
             'parseMode' => ($parseMode ?? $this->parseMode)->value,
         ];
 
         if ($filePath !== null) {
             /** @phpstan-ignore return.type */
-            return $this->httpClient->post(
+            return $this->httpClient->postMultipart(
                 $endpoint,
                 $params,
                 $filePath,

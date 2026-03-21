@@ -121,7 +121,29 @@ $botEventListener->onCommand(
 );
 
 // Start long polling (must be called after all handlers are registered)
-$botEventListener->listen(pollTime: 30);
+$botEventListener->listen(
+    pollTime: 30,
+    onException: function (
+        \Exception $exception,
+        \BelkaTech\VkTeamsBot\Event\EventDto $event
+    ): void {
+        // Log the error
+        $this->logger->error('Some text', [
+            'event_id' => $event->eventId,
+            'event_type' => $event->type,
+            'event_payload' => $event->payload,
+            'exception' => $exception,
+        ]);
+        error_log($exception->getMessage());
+        
+        // Or catch exception to an error reporting system
+        $this->sentry->captureException($exception);
+        
+        // On exception loop continues,
+        // you can re-throw the exception to force stop the loop
+        throw $exception;
+    },
+);
 
 // Stop the listener programmatically (e.g. from a handler)
 $botEventListener->stop();
