@@ -32,7 +32,7 @@ composer require belka-tech/php-vk-teams-bot
 ```php
 $bot = new \BelkaTech\VkTeamsBot\Bot(
     new \BelkaTech\VkTeamsBot\Http\HttpClient(
-        baseUrl: 'https://api.icq.net/bot',
+        baseUri: 'https://api.icq.net/bot',
         token: 'YOUR_BOT_TOKEN',
         client: new \GuzzleHttp\Client(),
         requestFactory: new \GuzzleHttp\Psr7\HttpFactory(),
