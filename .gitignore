@@ -1,11 +1,23 @@
+# Composer
 /vendor/
-/.phpunit.cache/
 composer.lock
-phpunit.xml
 
-# Common stuff
+# QA
+/.phpunit.cache/
+phpunit.xml
+phpstan.neon
+
+# Docker
+compose.override.yml
+compose.override.yaml
+docker-compose.override.yml
+docker-compose.override.yaml
+
+# IDE
 /.idea/
 /.vscode/
 *.swp
 *.swo
+
+# OS
 .DS_Store

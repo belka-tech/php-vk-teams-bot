@@ -30,23 +30,17 @@ composer require belka-tech/php-vk-teams-bot
 ## Quick Start
 
 ```php
-use BelkaTech\VkTeamsBot\Bot;
-use BelkaTech\VkTeamsBot\Http\HttpClient;
-use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\HttpFactory;
+$factory = new \GuzzleHttp\Psr7\HttpFactory();
 
-$client = new Client();
-$factory = new HttpFactory();
-
-$httpClient = new HttpClient(
-    baseUrl: 'https://api.icq.net/bot/v1',
-    token: 'YOUR_BOT_TOKEN',
-    client: $client,
-    requestFactory: $factory,
-    streamFactory: $factory,
+$bot = new \BelkaTech\VkTeamsBot\Bot(
+    new \BelkaTech\VkTeamsBot\Http\HttpClient(
+        baseUrl: 'https://api.icq.net/bot/v1',
+        token: 'YOUR_BOT_TOKEN',
+        client: new \GuzzleHttp\Client(),
+        requestFactory: $factory,
+        streamFactory: $factory,
+    ),
 );
-
-$bot = new Bot($httpClient);
 
 // Send a text message
 $bot->messages->sendText(
@@ -96,7 +90,10 @@ Long polling for receiving events:
 
 ```php
 $bot->events->onMessage(
-    function (Bot $bot, array $event) {
+    function (
+        \BelkaTech\VkTeamsBot\Bot $bot,
+        array $event,
+    ): void {
         $bot->messages->sendText(
             chatId: $event['payload']['chat']['chatId'],
             text: 'Pong!',
@@ -106,7 +103,10 @@ $bot->events->onMessage(
 
 $bot->events->onCommand(
     '/start',
-    function (Bot $bot, array $event) {
+    function (
+        \BelkaTech\VkTeamsBot\Bot $bot,
+        array $event,
+    ): void {
         // handle /start command
     },
 );
@@ -117,21 +117,17 @@ $bot->events->poll($bot, pollTime: 30);
 ### Keyboard
 
 ```php
-use BelkaTech\VkTeamsBot\Keyboard\Button;
-use BelkaTech\VkTeamsBot\Keyboard\Keyboard;
-use BelkaTech\VkTeamsBot\Enum\ButtonStyleEnum;
-
-$keyboard = new Keyboard();
+$keyboard = new \BelkaTech\VkTeamsBot\Keyboard\Keyboard();
 $keyboard->addRow([
-    new Button(
+    new \BelkaTech\VkTeamsBot\Keyboard\Button(
         text: 'OK',
         callbackData: 'confirm',
-        style: ButtonStyleEnum::Primary,
+        style: \BelkaTech\VkTeamsBot\Enum\ButtonStyleEnum::Primary,
     ),
-    new Button(
+    new \BelkaTech\VkTeamsBot\Keyboard\Button(
         text: 'Cancel',
         callbackData: 'cancel',
-        style: ButtonStyleEnum::Attention,
+        style: \BelkaTech\VkTeamsBot\Enum\ButtonStyleEnum::Attention,
     ),
 ]);
 
@@ -147,9 +143,10 @@ $bot->messages->sendText(
 Decorator for a PSR-18 client that logs requests and responses:
 
 ```php
-use BelkaTech\VkTeamsBot\Http\LoggingHttpClient;
-
-$loggingClient = new LoggingHttpClient($psrHttpClient, $psrLogger);
+$loggingClient = new \BelkaTech\VkTeamsBot\Http\LoggingHttpClient(
+    $psrHttpClient,
+    $psrLogger,
+);
 ```
 
 ## Parse Mode
@@ -157,9 +154,10 @@ $loggingClient = new LoggingHttpClient($psrHttpClient, $psrLogger);
 `HTML` is used by default. You can switch to `MarkdownV2`:
 
 ```php
-use BelkaTech\VkTeamsBot\Enum\ParseModeEnum;
-
-$bot = new Bot($httpClient, ParseModeEnum::MarkdownV2);
+$bot = new \BelkaTech\VkTeamsBot\Bot(
+    httpClient: $httpClient,
+    parseMode: \BelkaTech\VkTeamsBot\Enum\ParseModeEnum::MarkdownV2,
+);
 ```
 
 You can also specify `parseMode` for an individual message:
@@ -168,7 +166,7 @@ You can also specify `parseMode` for an individual message:
 $bot->messages->sendText(
     chatId: '123456',
     text: '*bold*',
-    parseMode: ParseModeEnum::MarkdownV2,
+    parseMode: \BelkaTech\VkTeamsBot\Enum\ParseModeEnum::MarkdownV2,
 );
 ```
 
