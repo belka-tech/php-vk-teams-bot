@@ -7,9 +7,7 @@ namespace BelkaTech\VkTeamsBot;
 use BelkaTech\VkTeamsBot\Enum\EventTypeEnum;
 use BelkaTech\VkTeamsBot\Event\EventDto;
 use InvalidArgumentException;
-use Psr\Http\Client\ClientExceptionInterface;
-use Psr\Http\Client\RequestExceptionInterface;
-use TypeError;
+use Psr\Http\Client\NetworkExceptionInterface;
 
 final class BotEventListener
 {
@@ -175,8 +173,6 @@ final class BotEventListener
      *     type: string,
      *     payload: array<string, mixed>,
      * }>
-     *
-     * @throws ClientExceptionInterface
      */
     private function fetchEvents(
         int $pollTime,
@@ -192,7 +188,11 @@ final class BotEventListener
             }
 
             return $eventList;
-        } catch (TypeError | RequestExceptionInterface $e) {
+        } catch (NetworkExceptionInterface) {
+            // Delay to keep the loop rhythm similar to a normal poll cycle —
+            // fast failures like DNS/connect errors would otherwise spin the loop.
+            sleep($pollTime);
+
             return [];
         }
     }
