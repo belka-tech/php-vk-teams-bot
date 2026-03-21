@@ -42,7 +42,7 @@ final readonly class MessagesApi
         ?ParseModeEnum $parseMode = null,
     ): array {
         /** @phpstan-ignore return.type */
-        return $this->httpClient->get('/messages/sendText', [
+        return $this->httpClient->get('/v1/messages/sendText', [
             'chatId' => $chatId,
             'text' => $text,
             'replyMsgId' => $replyMsgId,
@@ -83,7 +83,7 @@ final readonly class MessagesApi
         ?ParseModeEnum $parseMode = null,
     ): array {
         return $this->sendMedia(
-            '/messages/sendFile',
+            '/v1/messages/sendFile',
             $chatId,
             $fileId,
             $filePath,
@@ -136,14 +136,14 @@ final readonly class MessagesApi
 
             /** @phpstan-ignore return.type */
             return $this->httpClient->post(
-                '/messages/sendVoice',
+                '/v1/messages/sendVoice',
                 $params,
                 $filePath,
             );
         }
 
         /** @phpstan-ignore return.type */
-        return $this->httpClient->get('/messages/sendVoice', $params);
+        return $this->httpClient->get('/v1/messages/sendVoice', $params);
     }
 
     /**
@@ -166,7 +166,7 @@ final readonly class MessagesApi
         ?ParseModeEnum $parseMode = null,
     ): array {
         /** @phpstan-ignore return.type */
-        return $this->httpClient->get('/messages/editText', [
+        return $this->httpClient->get('/v1/messages/editText', [
             'chatId' => $chatId,
             'msgId' => $msgId,
             'text' => $text,
@@ -187,7 +187,7 @@ final readonly class MessagesApi
         array $msgIds,
     ): array {
         /** @phpstan-ignore return.type */
-        return $this->httpClient->get('/messages/deleteMessages', [
+        return $this->httpClient->get('/v1/messages/deleteMessages', [
             'chatId' => $chatId,
             'msgIds' => json_encode($msgIds, flags: JSON_THROW_ON_ERROR),
         ]);
@@ -205,7 +205,7 @@ final readonly class MessagesApi
         ?string $url = null,
     ): array {
         /** @phpstan-ignore return.type */
-        return $this->httpClient->get('/messages/answerCallbackQuery', [
+        return $this->httpClient->get('/v1/messages/answerCallbackQuery', [
             'queryId' => $queryId,
             'textAnswer' => $text,
             'showAlert' => $showAlert,
@@ -223,7 +223,7 @@ final readonly class MessagesApi
         string|int $msgId,
     ): array {
         /** @phpstan-ignore return.type */
-        return $this->httpClient->get('/chats/pinMessage', [
+        return $this->httpClient->get('/v1/chats/pinMessage', [
             'groupOrChannelId' => $groupOrChannelId,
             'msgId' => $msgId,
         ]);
@@ -239,7 +239,7 @@ final readonly class MessagesApi
         string|int $msgId,
     ): array {
         /** @phpstan-ignore return.type */
-        return $this->httpClient->get('/chats/unpinMessage', [
+        return $this->httpClient->get('/v1/chats/unpinMessage', [
             'groupOrChannelId' => $groupOrChannelId,
             'msgId' => $msgId,
         ]);
@@ -260,7 +260,7 @@ final readonly class MessagesApi
         string $fileId,
     ): array {
         /** @phpstan-ignore return.type */
-        return $this->httpClient->get('/files/getInfo', [
+        return $this->httpClient->get('/v1/files/getInfo', [
             'fileId' => $fileId,
         ]);
     }
