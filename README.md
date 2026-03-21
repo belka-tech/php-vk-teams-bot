@@ -82,21 +82,17 @@ $bot->messages->sendText(
 | `setAbout()`       | Set chat description               |
 | `setRules()`       | Set chat rules                     |
 
+### Events API (`$bot->events`)
+
+| Method  | Description                        |
+|---------|------------------------------------|
+| `get()` | Fetch events (long polling)        |
+
 ### Event Listener
 
-Long polling for receiving events:
+Long polling with event dispatching:
 
 ```php
-$bot = new \BelkaTech\VkTeamsBot\Bot(
-    new \BelkaTech\VkTeamsBot\Http\HttpClient(
-        baseUrl: 'https://api.icq.net/bot',
-        token: 'YOUR_BOT_TOKEN',
-        client: new \GuzzleHttp\Client(),
-        requestFactory: new \GuzzleHttp\Psr7\HttpFactory(),
-        streamFactory: new \GuzzleHttp\Psr7\HttpFactory(),
-    ),
-);
-
 $botEventListener = new \BelkaTech\VkTeamsBot\BotEventListener(
     bot: $bot,
 );
@@ -105,10 +101,10 @@ $botEventListener = new \BelkaTech\VkTeamsBot\BotEventListener(
 $botEventListener->onMessage(
     function (
         \BelkaTech\VkTeamsBot\Bot $bot,
-        array $event,
+        \BelkaTech\VkTeamsBot\Event\EventDto $event,
     ): void {
         $bot->messages->sendText(
-            chatId: $event['payload']['chat']['chatId'],
+            chatId: $event->payload['chat']['chatId'],
             text: 'Pong!',
         );
     },
@@ -118,7 +114,7 @@ $botEventListener->onCommand(
     '/start',
     function (
         \BelkaTech\VkTeamsBot\Bot $bot,
-        array $event,
+        \BelkaTech\VkTeamsBot\Event\EventDto $event,
     ): void {
         // handle /start command
     },
@@ -130,6 +126,20 @@ $botEventListener->listen(pollTime: 30);
 // Stop the listener programmatically (e.g. from a handler)
 $botEventListener->stop();
 ```
+
+| Method              | Description                        |
+|---------------------|------------------------------------|
+| `onCommand()`       | Register a command handler         |
+| `onMessage()`       | Handle new messages                |
+| `onEditedMessage()` | Handle edited messages             |
+| `onDeletedMessage()`| Handle deleted messages            |
+| `onPinnedMessage()` | Handle pinned messages             |
+| `onUnpinnedMessage()`| Handle unpinned messages          |
+| `onNewChatMember()` | Handle new chat members            |
+| `onLeftChatMember()`| Handle members leaving             |
+| `onCallbackQuery()` | Handle callback queries            |
+| `listen()`          | Start long polling                 |
+| `stop()`            | Stop the listener                  |
 
 If the `pcntl` extension is available, `SIGTERM` and `SIGINT` signals are handled automatically for graceful shutdown.
 Without `pcntl`, use `$botEventListener->stop()` from a handler to stop the loop.
