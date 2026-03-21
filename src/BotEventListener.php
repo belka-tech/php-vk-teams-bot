@@ -12,7 +12,7 @@ use TypeError;
 
 final class BotEventListener
 {
-    private int $lastEventId = 1;
+    private int $lastEventId = 0;
 
     /** @var array<string, list<callable>> */
     private array $handlers = [];
@@ -85,6 +85,12 @@ final class BotEventListener
     public function listen(
         int $pollTime,
     ): void {
+        if ($pollTime < 1 || $pollTime > 60) {
+            throw new InvalidArgumentException(
+                "pollTime must be between 1 and 60 seconds, got {$pollTime}",
+            );
+        }
+
         while (true) { /** @phpstan-ignore while.alwaysTrue */
             foreach ($this->fetchEvents($pollTime) as $event) {
                 if ($event['type'] === EventTypeEnum::MessageNew->value) {
@@ -118,17 +124,10 @@ final class BotEventListener
      * }>
      *
      * @throws ClientExceptionInterface
-     * @throws InvalidArgumentException
      */
     private function fetchEvents(
         int $pollTime,
     ): array {
-        if ($pollTime < 1 || $pollTime > 60) {
-            throw new InvalidArgumentException(
-                "pollTime must be between 1 and 60 seconds, got {$pollTime}",
-            );
-        }
-
         try {
             $events = $this->bot->events->get($this->lastEventId, $pollTime);
 
