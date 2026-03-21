@@ -30,15 +30,13 @@ composer require belka-tech/php-vk-teams-bot
 ## Quick Start
 
 ```php
-$factory = new \GuzzleHttp\Psr7\HttpFactory();
-
 $bot = new \BelkaTech\VkTeamsBot\Bot(
     new \BelkaTech\VkTeamsBot\Http\HttpClient(
-        baseUrl: 'https://api.icq.net/bot/v1',
+        baseUrl: 'https://api.icq.net/bot',
         token: 'YOUR_BOT_TOKEN',
         client: new \GuzzleHttp\Client(),
-        requestFactory: $factory,
-        streamFactory: $factory,
+        requestFactory: new \GuzzleHttp\Psr7\HttpFactory(),
+        streamFactory: new \GuzzleHttp\Psr7\HttpFactory(),
     ),
 );
 
@@ -84,12 +82,27 @@ $bot->messages->sendText(
 | `setAbout()`       | Set chat description               |
 | `setRules()`       | Set chat rules                     |
 
-### Events (`$bot->events`)
+### Event Listener
 
 Long polling for receiving events:
 
 ```php
-$bot->events->onMessage(
+$bot = new \BelkaTech\VkTeamsBot\Bot(
+    new \BelkaTech\VkTeamsBot\Http\HttpClient(
+        baseUrl: 'https://api.icq.net/bot',
+        token: 'YOUR_BOT_TOKEN',
+        client: new \GuzzleHttp\Client(),
+        requestFactory: new \GuzzleHttp\Psr7\HttpFactory(),
+        streamFactory: new \GuzzleHttp\Psr7\HttpFactory(),
+    ),
+);
+
+$botEventListener = new \BelkaTech\VkTeamsBot\BotEventListener(
+    bot: $bot,
+);
+
+// Register event handlers
+$botEventListener->onMessage(
     function (
         \BelkaTech\VkTeamsBot\Bot $bot,
         array $event,
@@ -101,7 +114,7 @@ $bot->events->onMessage(
     },
 );
 
-$bot->events->onCommand(
+$botEventListener->onCommand(
     '/start',
     function (
         \BelkaTech\VkTeamsBot\Bot $bot,
@@ -111,7 +124,8 @@ $bot->events->onCommand(
     },
 );
 
-$bot->events->poll($bot, pollTime: 30);
+// Start long polling (must be called after all handlers are registered)
+$botEventListener->listen(pollTime: 30);
 ```
 
 ### Keyboard

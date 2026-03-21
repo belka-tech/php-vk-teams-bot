@@ -33,7 +33,7 @@ final readonly class ChatsApi
         bool $joinModeration = true,
     ): array {
         /** @phpstan-ignore return.type */
-        return $this->httpClient->get('/chats/createChat', [
+        return $this->httpClient->get('/v1/chats/createChat', [
             'name' => $name,
             'about' => $about,
             'rules' => $rules,
@@ -55,7 +55,7 @@ final readonly class ChatsApi
         array $members,
     ): array {
         /** @phpstan-ignore return.type */
-        return $this->httpClient->get('/chats/members/add', [
+        return $this->httpClient->get('/v1/chats/members/add', [
             'chatId' => $chatId,
             'members' => json_encode($members, flags: JSON_THROW_ON_ERROR),
         ]);
@@ -72,7 +72,7 @@ final readonly class ChatsApi
         array $members,
     ): array {
         /** @phpstan-ignore return.type */
-        return $this->httpClient->get('/chats/members/delete', [
+        return $this->httpClient->get('/v1/chats/members/delete', [
             'chatId' => $chatId,
             'members' => json_encode($members, flags: JSON_THROW_ON_ERROR),
         ]);
@@ -88,7 +88,7 @@ final readonly class ChatsApi
         string $action,
     ): array {
         /** @phpstan-ignore return.type */
-        return $this->httpClient->get('/chats/sendActions', [
+        return $this->httpClient->get('/v1/chats/sendActions', [
             'chatId' => $chatId,
             'actions' => $action,
         ]);
@@ -117,7 +117,7 @@ final readonly class ChatsApi
         string $chatId,
     ): array {
         /** @phpstan-ignore return.type */
-        return $this->httpClient->get('/chats/getInfo', [
+        return $this->httpClient->get('/v1/chats/getInfo', [
             'chatId' => $chatId,
         ]);
     }
@@ -134,7 +134,7 @@ final readonly class ChatsApi
         string $chatId,
     ): array {
         /** @phpstan-ignore return.type */
-        return $this->httpClient->get('/chats/getAdmins', [
+        return $this->httpClient->get('/v1/chats/getAdmins', [
             'chatId' => $chatId,
         ]);
     }
@@ -151,7 +151,7 @@ final readonly class ChatsApi
         string $chatId,
     ): array {
         /** @phpstan-ignore return.type */
-        return $this->httpClient->get('/chats/getMembers', [
+        return $this->httpClient->get('/v1/chats/getMembers', [
             'chatId' => $chatId,
         ]);
     }
@@ -168,7 +168,7 @@ final readonly class ChatsApi
         string $chatId,
     ): array {
         /** @phpstan-ignore return.type */
-        return $this->httpClient->get('/chats/getBlockedUsers', [
+        return $this->httpClient->get('/v1/chats/getBlockedUsers', [
             'chatId' => $chatId,
         ]);
     }
@@ -185,7 +185,7 @@ final readonly class ChatsApi
         string $chatId,
     ): array {
         /** @phpstan-ignore return.type */
-        return $this->httpClient->get('/chats/getPendingUsers', [
+        return $this->httpClient->get('/v1/chats/getPendingUsers', [
             'chatId' => $chatId,
         ]);
     }
@@ -201,7 +201,7 @@ final readonly class ChatsApi
         bool $delLastMessages,
     ): array {
         /** @phpstan-ignore return.type */
-        return $this->httpClient->get('/chats/blockUser', [
+        return $this->httpClient->get('/v1/chats/blockUser', [
             'chatId' => $chatId,
             'userId' => $userId,
             'delLastMessages' => $delLastMessages,
@@ -218,7 +218,7 @@ final readonly class ChatsApi
         string $userId,
     ): array {
         /** @phpstan-ignore return.type */
-        return $this->httpClient->get('/chats/unblockUser', [
+        return $this->httpClient->get('/v1/chats/unblockUser', [
             'chatId' => $chatId,
             'userId' => $userId,
         ]);
@@ -238,7 +238,7 @@ final readonly class ChatsApi
     ): array {
         if ($userId !== null) {
             /** @phpstan-ignore return.type */
-            return $this->httpClient->get('/chats/resolvePending', [
+            return $this->httpClient->get('/v1/chats/resolvePending', [
                 'chatId' => $chatId,
                 'approve' => $approve,
                 'userId' => $userId,
@@ -247,7 +247,7 @@ final readonly class ChatsApi
 
         if ($everyone !== null) {
             /** @phpstan-ignore return.type */
-            return $this->httpClient->get('/chats/resolvePending', [
+            return $this->httpClient->get('/v1/chats/resolvePending', [
                 'chatId' => $chatId,
                 'approve' => $approve,
                 'everyone' => $everyone,
@@ -267,7 +267,7 @@ final readonly class ChatsApi
         string $title,
     ): array {
         /** @phpstan-ignore return.type */
-        return $this->httpClient->get('/chats/setTitle', [
+        return $this->httpClient->get('/v1/chats/setTitle', [
             'chatId' => $chatId,
             'title' => $title,
         ]);
@@ -284,7 +284,7 @@ final readonly class ChatsApi
     ): array {
         /** @phpstan-ignore return.type */
         return $this->httpClient->post(
-            '/chats/avatar/set',
+            '/v1/chats/avatar/set',
             ['chatId' => $chatId],
             $imagePath,
         );
@@ -300,7 +300,7 @@ final readonly class ChatsApi
         string $about,
     ): array {
         /** @phpstan-ignore return.type */
-        return $this->httpClient->get('/chats/setAbout', [
+        return $this->httpClient->get('/v1/chats/setAbout', [
             'chatId' => $chatId,
             'about' => $about,
         ]);
@@ -316,7 +316,7 @@ final readonly class ChatsApi
         string $rules,
     ): array {
         /** @phpstan-ignore return.type */
-        return $this->httpClient->get('/chats/setRules', [
+        return $this->httpClient->get('/v1/chats/setRules', [
             'chatId' => $chatId,
             'rules' => $rules,
         ]);

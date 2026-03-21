@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace BelkaTech\VkTeamsBot;
 
 use BelkaTech\VkTeamsBot\Enum\EventTypeEnum;
-use BelkaTech\VkTeamsBot\Http\HttpClient;
 use InvalidArgumentException;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\RequestExceptionInterface;
 use TypeError;
 
-final class EventLoop
+final class BotEventListener
 {
     private int $lastEventId = 1;
 
@@ -22,7 +21,7 @@ final class EventLoop
     private array $commandHandlers = [];
 
     public function __construct(
-        private readonly HttpClient $http,
+        private readonly Bot $bot,
     ) {}
 
     public function onCommand(
@@ -83,8 +82,7 @@ final class EventLoop
     /**
      * @param int $pollTime Maximum polling request duration (1-60 sec)
      */
-    public function poll(
-        Bot $bot,
+    public function listen(
         int $pollTime,
     ): void {
         while (true) { /** @phpstan-ignore while.alwaysTrue */
@@ -95,7 +93,7 @@ final class EventLoop
                         : '';
                     foreach ($this->commandHandlers as $command => $handler) {
                         if (str_starts_with($text, $command)) {
-                            $handler($bot, $event);
+                            $handler($this->bot, $event);
 
                             continue 3;
                         }
@@ -104,7 +102,7 @@ final class EventLoop
 
                 if (array_key_exists($event['type'], $this->handlers)) {
                     foreach ($this->handlers[$event['type']] as $handler) {
-                        $handler($bot, $event);
+                        $handler($this->bot, $event);
                     }
                 }
             }
@@ -122,7 +120,7 @@ final class EventLoop
      * @throws ClientExceptionInterface
      * @throws InvalidArgumentException
      */
-    public function fetchEvents(
+    private function fetchEvents(
         int $pollTime,
     ): array {
         if ($pollTime < 1 || $pollTime > 60) {
@@ -132,18 +130,8 @@ final class EventLoop
         }
 
         try {
-            $events = $this->http->get('/events/get', [
-                'lastEventId' => $this->lastEventId,
-                'pollTime' => $pollTime,
-            ]);
+            $events = $this->bot->events->get($this->lastEventId, $pollTime);
 
-            /**
-             * @var list<array{
-             *   eventId: int,
-             *   type: string,
-             *   payload: array<string, mixed>,
-             * }> $eventList
-             */
             $eventList = $events['events'];
 
             if ($eventList !== []) {

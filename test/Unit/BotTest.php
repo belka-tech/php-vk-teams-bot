@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace BelkaTech\VkTeamsBot\Test\Unit;
 
 use BelkaTech\VkTeamsBot\Api\ChatsApi;
+use BelkaTech\VkTeamsBot\Api\EventsApi;
 use BelkaTech\VkTeamsBot\Api\MessagesApi;
 use BelkaTech\VkTeamsBot\Bot;
 use BelkaTech\VkTeamsBot\Enum\ParseModeEnum;
-use BelkaTech\VkTeamsBot\EventLoop;
 use BelkaTech\VkTeamsBot\Http\HttpClient;
 use PHPUnit\Framework\TestCase;
 
@@ -22,7 +22,7 @@ final class BotTest extends TestCase
 
         $this->assertInstanceOf(MessagesApi::class, $bot->messages);
         $this->assertInstanceOf(ChatsApi::class, $bot->chats);
-        $this->assertInstanceOf(EventLoop::class, $bot->events);
+        $this->assertInstanceOf(EventsApi::class, $bot->events);
     }
 
     public function testConstructorAcceptsCustomParseMode(): void
