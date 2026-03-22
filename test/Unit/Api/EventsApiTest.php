@@ -24,8 +24,10 @@ final class EventsApiTest extends TestCase
 
     public function testGet(): void
     {
+        // WHEN: events/get is called
         $result = $this->api->get(lastEventId: 42, pollTime: 30);
 
+        // THEN: correct HTTP request is made and response returned
         $this->assertCount(1, $this->httpClientSpy->calls);
         [$method, $path, $params] = $this->httpClientSpy->calls[0];
         $this->assertSame('get', $method);

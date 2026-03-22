@@ -16,10 +16,13 @@ final class BotTest extends TestCase
 {
     public function testConstructorCreatesApiInstances(): void
     {
+        // GIVEN: a mocked HttpClient
         $httpClient = $this->createMock(HttpClient::class);
 
+        // WHEN: Bot is constructed with default params
         $bot = new Bot($httpClient);
 
+        // THEN: all API instances are created
         $this->assertInstanceOf(MessagesApi::class, $bot->messages);
         $this->assertInstanceOf(ChatsApi::class, $bot->chats);
         $this->assertInstanceOf(EventsApi::class, $bot->events);
@@ -27,10 +30,13 @@ final class BotTest extends TestCase
 
     public function testConstructorAcceptsCustomParseMode(): void
     {
+        // GIVEN: a mocked HttpClient
         $httpClient = $this->createMock(HttpClient::class);
 
+        // WHEN: Bot is constructed with custom parse mode
         $bot = new Bot($httpClient, ParseModeEnum::MarkdownV2);
 
+        // THEN: Bot is created successfully
         $this->assertInstanceOf(MessagesApi::class, $bot->messages);
     }
 }
