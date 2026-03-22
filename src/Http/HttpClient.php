@@ -53,7 +53,7 @@ final class HttpClient
      *
      * @throws ClientExceptionInterface
      */
-    public function post(
+    public function postMultipart(
         string $path,
         array $params,
         string $filePath,
@@ -110,7 +110,7 @@ final class HttpClient
     ): array {
         return array_filter(
             $params,
-            static fn(mixed $value): bool => $value !== null && $value !== 'null',
+            static fn(mixed $value): bool => $value !== null,
         );
     }
 }

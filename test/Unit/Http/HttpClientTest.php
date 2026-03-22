@@ -82,7 +82,6 @@ final class HttpClientTest extends TestCase
             ->method('createRequest')
             ->with('GET', $this->callback(function (string $url): bool {
                 $this->assertStringNotContainsString('replyMsgId', $url);
-                $this->assertStringNotContainsString('nullParam', $url);
                 return true;
             }))
             ->willReturn($request);
@@ -100,7 +99,6 @@ final class HttpClientTest extends TestCase
         $httpClient->get('/messages/sendText', [
             'chatId' => '123',
             'replyMsgId' => null,
-            'nullParam' => 'null',
         ]);
     }
 
@@ -138,6 +136,100 @@ final class HttpClientTest extends TestCase
         );
 
         $httpClient->get('/self/get');
+    }
+
+    public function testGetDoesNotFilterNullString(): void
+    {
+        $stream = $this->createMock(StreamInterface::class);
+        $stream->method('__toString')->willReturn('{"ok":true}');
+
+        $response = $this->createMock(ResponseInterface::class);
+        $response->method('getBody')->willReturn($stream);
+        $response->method('getStatusCode')->willReturn(200);
+
+        $request = $this->createMock(RequestInterface::class);
+
+        $psrClient = $this->createMock(ClientInterface::class);
+        $psrClient->method('sendRequest')->willReturn($response);
+
+        $requestFactory = $this->createMock(RequestFactoryInterface::class);
+        $requestFactory->expects($this->once())
+            ->method('createRequest')
+            ->with('GET', $this->callback(function (string $url): bool {
+                $this->assertStringContainsString('stringParam=null', $url);
+                return true;
+            }))
+            ->willReturn($request);
+
+        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+
+        $httpClient = new HttpClient(
+            baseUri: 'https://api.icq.net/bot/v1',
+            token: 'test-token',
+            client: $psrClient,
+            requestFactory: $requestFactory,
+            streamFactory: $streamFactory,
+        );
+
+        $httpClient->get('/messages/sendText', [
+            'chatId' => '123',
+            'stringParam' => 'null',
+        ]);
+    }
+
+    public function testFilterParamsRemovesNullButKeepsOtherFalsyValues(): void
+    {
+        $stream = $this->createMock(StreamInterface::class);
+        $stream->method('__toString')->willReturn('{"ok":true}');
+
+        $response = $this->createMock(ResponseInterface::class);
+        $response->method('getBody')->willReturn($stream);
+        $response->method('getStatusCode')->willReturn(200);
+
+        $request = $this->createMock(RequestInterface::class);
+
+        $psrClient = $this->createMock(ClientInterface::class);
+        $psrClient->method('sendRequest')->willReturn($response);
+
+        $requestFactory = $this->createMock(RequestFactoryInterface::class);
+        $requestFactory->expects($this->once())
+            ->method('createRequest')
+            ->with('GET', $this->callback(function (string $url): bool {
+                parse_str(parse_url($url, PHP_URL_QUERY), $query);
+
+                // null values must be filtered out
+                $this->assertArrayNotHasKey('nullParam', $query);
+
+                // falsy but non-null values must be preserved
+                $this->assertArrayHasKey('emptyString', $query);
+                $this->assertSame('', $query['emptyString']);
+                $this->assertArrayHasKey('zero', $query);
+                $this->assertSame('0', $query['zero']);
+                $this->assertArrayHasKey('false', $query);
+                $this->assertArrayHasKey('stringNull', $query);
+                $this->assertSame('null', $query['stringNull']);
+
+                return true;
+            }))
+            ->willReturn($request);
+
+        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+
+        $httpClient = new HttpClient(
+            baseUri: 'https://api.example.com',
+            token: 'test-token',
+            client: $psrClient,
+            requestFactory: $requestFactory,
+            streamFactory: $streamFactory,
+        );
+
+        $httpClient->get('/test', [
+            'nullParam' => null,
+            'emptyString' => '',
+            'zero' => 0,
+            'false' => false,
+            'stringNull' => 'null',
+        ]);
     }
 
     public function testGetThrowsOnClientError(): void

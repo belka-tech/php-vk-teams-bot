@@ -7,7 +7,7 @@ namespace BelkaTech\VkTeamsBot\Keyboard;
 final class Keyboard implements \JsonSerializable
 {
     /** @var list<list<Button>> */
-    public array $rows = [];
+    private array $rows = [];
 
     /**
      * @param list<Button> $row
