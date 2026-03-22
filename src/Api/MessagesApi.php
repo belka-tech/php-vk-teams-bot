@@ -18,12 +18,6 @@ final readonly class MessagesApi
 
     /**
      * @param list<string|int>|null $forwardMsgId
-     * @param list<list<array{
-     *     text: string,
-     *     url?: string,
-     *     callbackData?: string,
-     *     style?: string,
-     * }>>|Keyboard|null $inlineKeyboardMarkup
      * @return array{
      *     ok: bool,
      *     msgId: string,
@@ -37,7 +31,7 @@ final readonly class MessagesApi
         string|int|null $replyMsgId = null,
         ?string $forwardChatId = null,
         ?array $forwardMsgId = null,
-        array|Keyboard|null $inlineKeyboardMarkup = null,
+        ?Keyboard $inlineKeyboardMarkup = null,
         ?object $format = null,
         ?ParseModeEnum $parseMode = null,
     ): array {
@@ -56,12 +50,6 @@ final readonly class MessagesApi
 
     /**
      * @param list<string|int>|null $forwardMsgId
-     * @param list<list<array{
-     *     text: string,
-     *     url?: string,
-     *     callbackData?: string,
-     *     style?: string,
-     * }>>|Keyboard|null $inlineKeyboardMarkup
      * @return array{
      *     ok: bool,
      *     msgId: string,
@@ -78,7 +66,7 @@ final readonly class MessagesApi
         string|int|null $replyMsgId = null,
         ?string $forwardChatId = null,
         ?array $forwardMsgId = null,
-        array|Keyboard|null $inlineKeyboardMarkup = null,
+        ?Keyboard $inlineKeyboardMarkup = null,
         ?object $format = null,
         ?ParseModeEnum $parseMode = null,
     ): array {
@@ -99,12 +87,6 @@ final readonly class MessagesApi
 
     /**
      * @param list<string|int>|null $forwardMsgId
-     * @param list<list<array{
-     *     text: string,
-     *     url?: string,
-     *     callbackData?: string,
-     *     style?: string,
-     * }>>|Keyboard|null $inlineKeyboardMarkup
      * @return array{
      *     ok: bool,
      *     msgId: string,
@@ -120,7 +102,7 @@ final readonly class MessagesApi
         string|int|null $replyMsgId = null,
         ?string $forwardChatId = null,
         ?array $forwardMsgId = null,
-        array|Keyboard|null $inlineKeyboardMarkup = null,
+        ?Keyboard $inlineKeyboardMarkup = null,
     ): array {
         $params = [
             'chatId' => $chatId,
@@ -147,12 +129,6 @@ final readonly class MessagesApi
     }
 
     /**
-     * @param list<list<array{
-     *     text: string,
-     *     url?: string,
-     *     callbackData?: string,
-     *     style?: string,
-     * }>>|Keyboard|null $inlineKeyboardMarkup
      * @return array{ok: bool}
      *
      * @throws ClientExceptionInterface
@@ -161,7 +137,7 @@ final readonly class MessagesApi
         string $chatId,
         string|int $msgId,
         string $text,
-        array|Keyboard|null $inlineKeyboardMarkup = null,
+        ?Keyboard $inlineKeyboardMarkup = null,
         ?object $format = null,
         ?ParseModeEnum $parseMode = null,
     ): array {
@@ -267,12 +243,6 @@ final readonly class MessagesApi
 
     /**
      * @param list<string|int>|null $forwardMsgId
-     * @param list<list<array{
-     *     text: string,
-     *     url?: string,
-     *     callbackData?: string,
-     *     style?: string,
-     * }>>|Keyboard|null $inlineKeyboardMarkup
      * @return array{
      *     ok: bool,
      *     msgId: string,
@@ -290,7 +260,7 @@ final readonly class MessagesApi
         string|int|null $replyMsgId,
         ?string $forwardChatId,
         ?array $forwardMsgId,
-        array|Keyboard|null $inlineKeyboardMarkup,
+        ?Keyboard $inlineKeyboardMarkup,
         ?object $format,
         ?ParseModeEnum $parseMode,
     ): array {
