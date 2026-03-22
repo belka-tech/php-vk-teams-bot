@@ -193,8 +193,6 @@ final readonly class MessagesApi
         ]);
     }
 
-
-
     /**
      * @param list<string|int>|null $forwardMsgId
      * @return array{
