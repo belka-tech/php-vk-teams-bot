@@ -44,17 +44,17 @@ final class Keyboard implements \JsonSerializable
         $keyboard = new self();
 
         foreach ($rows as $rowIndex => $row) {
-            if (!\is_array($row) || $row === []) {
+            if (!\is_array($row) || $row === []) { // @phpstan-ignore function.alreadyNarrowedType
                 throw new \InvalidArgumentException("Row #{$rowIndex} must be a non-empty array of buttons");
             }
 
             $buttons = [];
             foreach ($row as $buttonIndex => $buttonData) {
-                if (!\is_array($buttonData)) {
+                if (!\is_array($buttonData)) { // @phpstan-ignore function.alreadyNarrowedType
                     throw new \InvalidArgumentException("Button #{$buttonIndex} in row #{$rowIndex} must be an array");
                 }
 
-                if (!isset($buttonData['text']) || !\is_string($buttonData['text'])) {
+                if (!isset($buttonData['text']) || !\is_string($buttonData['text'])) { // @phpstan-ignore isset.offset, booleanOr.alwaysFalse, booleanNot.alwaysFalse
                     throw new \InvalidArgumentException("Button #{$buttonIndex} in row #{$rowIndex} must have a string 'text' key");
                 }
 
