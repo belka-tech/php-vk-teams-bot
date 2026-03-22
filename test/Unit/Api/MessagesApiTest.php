@@ -29,8 +29,10 @@ final class MessagesApiTest extends TestCase
 
     public function testSendText(): void
     {
+        // WHEN: sendText is called
         $this->api->sendText('chat1', 'hello');
 
+        // THEN: correct GET request is sent with parseMode
         $this->assertCount(1, $this->httpClientSpy->calls);
         [$method, $path, $params] = $this->httpClientSpy->calls[0];
         $this->assertSame('get', $method);
@@ -42,6 +44,7 @@ final class MessagesApiTest extends TestCase
 
     public function testSendTextWithReplyAndForward(): void
     {
+        // WHEN: sendText is called with reply and forward params
         $this->api->sendText(
             'chat1',
             'hello',
@@ -50,6 +53,7 @@ final class MessagesApiTest extends TestCase
             forwardMsgId: [1, 2, 3],
         );
 
+        // THEN: reply and forward params are included
         $params = $this->httpClientSpy->calls[0][2];
         $this->assertSame(42, $params['replyMsgId']);
         $this->assertSame('chat2', $params['forwardChatId']);
@@ -58,8 +62,10 @@ final class MessagesApiTest extends TestCase
 
     public function testSendTextPassesNullForOmittedOptionalParams(): void
     {
+        // WHEN: sendText is called without optional params
         $this->api->sendText('chat1', 'hello');
 
+        // THEN: optional params are null
         $params = $this->httpClientSpy->calls[0][2];
         $this->assertNull($params['replyMsgId']);
         $this->assertNull($params['forwardChatId']);
@@ -69,8 +75,10 @@ final class MessagesApiTest extends TestCase
 
     public function testNullForwardMsgIdIsNotEncodedAsJsonNullString(): void
     {
+        // WHEN: sendText is called without forwardMsgId
         $this->api->sendText('chat1', 'hello');
 
+        // THEN: forwardMsgId is null, not string "null"
         $params = $this->httpClientSpy->calls[0][2];
         $this->assertNull($params['forwardMsgId']);
         $this->assertNotSame('null', $params['forwardMsgId']);
@@ -78,8 +86,10 @@ final class MessagesApiTest extends TestCase
 
     public function testNullInlineKeyboardIsNotEncodedAsJsonNullString(): void
     {
+        // WHEN: sendText is called without keyboard
         $this->api->sendText('chat1', 'hello');
 
+        // THEN: inlineKeyboardMarkup is null, not string "null"
         $params = $this->httpClientSpy->calls[0][2];
         $this->assertNull($params['inlineKeyboardMarkup']);
         $this->assertNotSame('null', $params['inlineKeyboardMarkup']);
@@ -97,16 +107,20 @@ final class MessagesApiTest extends TestCase
     #[DataProvider('invalidFileParamsProvider')]
     public function testSendFileThrowsOnInvalidFileParams(?string $fileId, ?string $filePath): void
     {
+        // THEN: exception is expected
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Exactly one of fileId or filePath must be provided');
 
+        // WHEN: sendFile is called with invalid file param combination
         $this->api->sendFile(chatId: 'chat1', fileId: $fileId, filePath: $filePath);
     }
 
     public function testSendFileWithFileIdUsesGet(): void
     {
+        // WHEN: sendFile is called with fileId
         $this->api->sendFile(chatId: 'chat1', fileId: 'abc');
 
+        // THEN: GET request is used
         [$method, $path, $params] = $this->httpClientSpy->calls[0];
         $this->assertSame('get', $method);
         $this->assertSame('/v1/messages/sendFile', $path);
@@ -115,8 +129,10 @@ final class MessagesApiTest extends TestCase
 
     public function testSendFileWithFilePathUsesPostMultipart(): void
     {
+        // WHEN: sendFile is called with filePath
         $this->api->sendFile(chatId: 'chat1', filePath: '/tmp/test.txt');
 
+        // THEN: multipart POST is used
         [$method, $path, $params, $filePath] = $this->httpClientSpy->calls[0];
         $this->assertSame('postMultipart', $method);
         $this->assertSame('/v1/messages/sendFile', $path);
@@ -126,8 +142,10 @@ final class MessagesApiTest extends TestCase
 
     public function testSendFileWithCaption(): void
     {
+        // WHEN: sendFile is called with caption
         $this->api->sendFile(chatId: 'chat1', fileId: 'abc', caption: 'my file');
 
+        // THEN: caption param is included
         $params = $this->httpClientSpy->calls[0][2];
         $this->assertSame('my file', $params['caption']);
     }
@@ -135,16 +153,20 @@ final class MessagesApiTest extends TestCase
     #[DataProvider('invalidFileParamsProvider')]
     public function testSendVoiceThrowsOnInvalidFileParams(?string $fileId, ?string $filePath): void
     {
+        // THEN: exception is expected
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Exactly one of fileId or filePath must be provided');
 
+        // WHEN: sendVoice is called with invalid file param combination
         $this->api->sendVoice(chatId: 'chat1', fileId: $fileId, filePath: $filePath);
     }
 
     public function testSendVoiceWithFileIdUsesGet(): void
     {
+        // WHEN: sendVoice is called with fileId
         $this->api->sendVoice(chatId: 'chat1', fileId: 'voice1');
 
+        // THEN: GET request is used
         [$method, $path, $params] = $this->httpClientSpy->calls[0];
         $this->assertSame('get', $method);
         $this->assertSame('/v1/messages/sendVoice', $path);
@@ -153,8 +175,10 @@ final class MessagesApiTest extends TestCase
 
     public function testSendVoiceWithFilePathUsesPostMultipart(): void
     {
+        // WHEN: sendVoice is called with filePath
         $this->api->sendVoice(chatId: 'chat1', filePath: '/tmp/voice.ogg');
 
+        // THEN: multipart POST is used
         [$method, $path, $params, $filePath] = $this->httpClientSpy->calls[0];
         $this->assertSame('postMultipart', $method);
         $this->assertSame('/v1/messages/sendVoice', $path);
@@ -164,9 +188,11 @@ final class MessagesApiTest extends TestCase
 
     public function testSendVoiceWithForwardAndKeyboard(): void
     {
+        // GIVEN: a keyboard with one button
         $keyboard = new Keyboard();
         $keyboard->addButton(new Button('btn', callbackData: 'cb1'));
 
+        // WHEN: sendVoice is called with forward and keyboard params
         $this->api->sendVoice(
             chatId: 'chat1',
             fileId: 'voice1',
@@ -176,6 +202,7 @@ final class MessagesApiTest extends TestCase
             inlineKeyboardMarkup: $keyboard,
         );
 
+        // THEN: all params are correctly sent
         $params = $this->httpClientSpy->calls[0][2];
         $this->assertSame(10, $params['replyMsgId']);
         $this->assertSame('chat2', $params['forwardChatId']);
@@ -188,8 +215,10 @@ final class MessagesApiTest extends TestCase
 
     public function testSendVoicePassesNullForOmittedOptionalParams(): void
     {
+        // WHEN: sendVoice is called without optional params
         $this->api->sendVoice(chatId: 'chat1', fileId: 'voice1');
 
+        // THEN: optional params are null, not string "null"
         $params = $this->httpClientSpy->calls[0][2];
         $this->assertNull($params['forwardMsgId']);
         $this->assertNull($params['inlineKeyboardMarkup']);
@@ -199,8 +228,10 @@ final class MessagesApiTest extends TestCase
 
     public function testEditText(): void
     {
+        // WHEN: editText is called
         $this->api->editText('chat1', 99, 'updated');
 
+        // THEN: correct request is sent
         [$method, $path, $params] = $this->httpClientSpy->calls[0];
         $this->assertSame('get', $method);
         $this->assertSame('/v1/messages/editText', $path);
@@ -212,11 +243,14 @@ final class MessagesApiTest extends TestCase
 
     public function testEditTextWithKeyboard(): void
     {
+        // GIVEN: a keyboard
         $keyboard = new Keyboard();
         $keyboard->addButton(new Button('ok', callbackData: 'ok'));
 
+        // WHEN: editText is called with keyboard
         $this->api->editText('chat1', 99, 'updated', inlineKeyboardMarkup: $keyboard);
 
+        // THEN: keyboard is serialized in params
         $params = $this->httpClientSpy->calls[0][2];
         $this->assertSame(
             json_encode($keyboard, JSON_THROW_ON_ERROR),
@@ -226,8 +260,10 @@ final class MessagesApiTest extends TestCase
 
     public function testEditTextPassesNullForOmittedKeyboard(): void
     {
+        // WHEN: editText is called without keyboard
         $this->api->editText('chat1', 99, 'updated');
 
+        // THEN: inlineKeyboardMarkup is null, not string "null"
         $params = $this->httpClientSpy->calls[0][2];
         $this->assertNull($params['inlineKeyboardMarkup']);
         $this->assertNotSame('null', $params['inlineKeyboardMarkup']);
@@ -235,8 +271,10 @@ final class MessagesApiTest extends TestCase
 
     public function testDeleteMessages(): void
     {
+        // WHEN: deleteMessages is called
         $this->api->deleteMessages('chat1', [1, 2, 3]);
 
+        // THEN: msgIds are JSON-encoded
         [$method, $path, $params] = $this->httpClientSpy->calls[0];
         $this->assertSame('get', $method);
         $this->assertSame('/v1/messages/deleteMessages', $path);
@@ -245,8 +283,10 @@ final class MessagesApiTest extends TestCase
 
     public function testAnswerCallbackQuery(): void
     {
+        // WHEN: answerCallbackQuery is called with text and showAlert
         $this->api->answerCallbackQuery('q1', text: 'done', showAlert: true);
 
+        // THEN: correct params are sent
         [$method, $path, $params] = $this->httpClientSpy->calls[0];
         $this->assertSame('get', $method);
         $this->assertSame('/v1/messages/answerCallbackQuery', $path);
@@ -257,8 +297,10 @@ final class MessagesApiTest extends TestCase
 
     public function testAnswerCallbackQueryDefaults(): void
     {
+        // WHEN: answerCallbackQuery is called with defaults
         $this->api->answerCallbackQuery('q1');
 
+        // THEN: default values are used
         $params = $this->httpClientSpy->calls[0][2];
         $this->assertNull($params['textAnswer']);
         $this->assertFalse($params['showAlert']);
@@ -267,8 +309,10 @@ final class MessagesApiTest extends TestCase
 
     public function testPinMessage(): void
     {
+        // WHEN: pinMessage is called
         $this->api->pinMessage('group1', 42);
 
+        // THEN: correct path and params are sent
         [$method, $path, $params] = $this->httpClientSpy->calls[0];
         $this->assertSame('get', $method);
         $this->assertSame('/v1/chats/pinMessage', $path);
@@ -278,15 +322,19 @@ final class MessagesApiTest extends TestCase
 
     public function testUnpinMessage(): void
     {
+        // WHEN: unpinMessage is called
         $this->api->unpinMessage('group1', 42);
 
+        // THEN: correct path is used
         $this->assertSame('/v1/chats/unpinMessage', $this->httpClientSpy->calls[0][1]);
     }
 
     public function testFilesGetInfo(): void
     {
+        // WHEN: filesGetInfo is called
         $this->api->filesGetInfo('file123');
 
+        // THEN: correct path and fileId are sent
         [$method, $path, $params] = $this->httpClientSpy->calls[0];
         $this->assertSame('get', $method);
         $this->assertSame('/v1/files/getInfo', $path);
@@ -310,8 +358,10 @@ final class MessagesApiTest extends TestCase
         ?ParseModeEnum $parseMode,
         string $expected,
     ): void {
+        // WHEN: sendText is called with given parseMode
         $this->api->sendText('chat1', 'hello', parseMode: $parseMode);
 
+        // THEN: correct parseMode is sent
         $this->assertSame($expected, $this->httpClientSpy->calls[0][2]['parseMode']);
     }
 
@@ -320,8 +370,10 @@ final class MessagesApiTest extends TestCase
         ?ParseModeEnum $parseMode,
         string $expected,
     ): void {
+        // WHEN: sendFile is called with given parseMode
         $this->api->sendFile(chatId: 'chat1', fileId: 'f1', parseMode: $parseMode);
 
+        // THEN: correct parseMode is sent
         $this->assertSame($expected, $this->httpClientSpy->calls[0][2]['parseMode']);
     }
 
@@ -330,8 +382,10 @@ final class MessagesApiTest extends TestCase
         ?ParseModeEnum $parseMode,
         string $expected,
     ): void {
+        // WHEN: editText is called with given parseMode
         $this->api->editText('chat1', 1, 'text', parseMode: $parseMode);
 
+        // THEN: correct parseMode is sent
         $this->assertSame($expected, $this->httpClientSpy->calls[0][2]['parseMode']);
     }
 
@@ -351,8 +405,10 @@ final class MessagesApiTest extends TestCase
     public function testSendTextKeyboardSerialization(
         Keyboard $keyboard,
     ): void {
+        // WHEN: sendText is called with keyboard
         $this->api->sendText('chat1', 'hello', inlineKeyboardMarkup: $keyboard);
 
+        // THEN: keyboard is JSON-encoded in params
         $this->assertSame(
             json_encode($keyboard, JSON_THROW_ON_ERROR),
             $this->httpClientSpy->calls[0][2]['inlineKeyboardMarkup'],
@@ -363,8 +419,10 @@ final class MessagesApiTest extends TestCase
     public function testSendFileKeyboardSerialization(
         Keyboard $keyboard,
     ): void {
+        // WHEN: sendFile is called with keyboard
         $this->api->sendFile(chatId: 'chat1', fileId: 'f1', inlineKeyboardMarkup: $keyboard);
 
+        // THEN: keyboard is JSON-encoded in params
         $this->assertSame(
             json_encode($keyboard, JSON_THROW_ON_ERROR),
             $this->httpClientSpy->calls[0][2]['inlineKeyboardMarkup'],
@@ -375,8 +433,10 @@ final class MessagesApiTest extends TestCase
     public function testSendVoiceKeyboardSerialization(
         Keyboard $keyboard,
     ): void {
+        // WHEN: sendVoice is called with keyboard
         $this->api->sendVoice(chatId: 'chat1', fileId: 'v1', inlineKeyboardMarkup: $keyboard);
 
+        // THEN: keyboard is JSON-encoded in params
         $this->assertSame(
             json_encode($keyboard, JSON_THROW_ON_ERROR),
             $this->httpClientSpy->calls[0][2]['inlineKeyboardMarkup'],
@@ -387,8 +447,10 @@ final class MessagesApiTest extends TestCase
     public function testEditTextKeyboardSerialization(
         Keyboard $keyboard,
     ): void {
+        // WHEN: editText is called with keyboard
         $this->api->editText('chat1', 1, 'text', inlineKeyboardMarkup: $keyboard);
 
+        // THEN: keyboard is JSON-encoded in params
         $this->assertSame(
             json_encode($keyboard, JSON_THROW_ON_ERROR),
             $this->httpClientSpy->calls[0][2]['inlineKeyboardMarkup'],

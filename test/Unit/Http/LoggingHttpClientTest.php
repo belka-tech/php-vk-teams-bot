@@ -17,6 +17,7 @@ final class LoggingHttpClientTest extends TestCase
 {
     public function testLogsRequestAndResponse(): void
     {
+        // GIVEN: mocked PSR client, request, response, and logger
         $uri = $this->createMock(UriInterface::class);
         $uri->method('getPath')->willReturn('/messages/sendText');
 
@@ -38,13 +39,17 @@ final class LoggingHttpClientTest extends TestCase
             ->method('debug');
 
         $client = new LoggingHttpClient($inner, $logger);
+
+        // WHEN: sendRequest is called
         $result = $client->sendRequest($request);
 
+        // THEN: original response is returned and logger is called twice
         $this->assertSame($response, $result);
     }
 
     public function testRewindsResponseBody(): void
     {
+        // GIVEN: mocked PSR client with body expecting rewind
         $uri = $this->createMock(UriInterface::class);
         $uri->method('getPath')->willReturn('/test');
 
@@ -65,6 +70,10 @@ final class LoggingHttpClientTest extends TestCase
         $logger = $this->createMock(LoggerInterface::class);
 
         $client = new LoggingHttpClient($inner, $logger);
+
+        // WHEN: sendRequest is called
         $client->sendRequest($request);
+
+        // THEN: body->rewind() is called (verified by expects above)
     }
 }

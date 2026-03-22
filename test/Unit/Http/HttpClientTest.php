@@ -17,6 +17,7 @@ final class HttpClientTest extends TestCase
 {
     public function testGetBuildsCorrectUrlAndReturnsDecodedJson(): void
     {
+        // GIVEN: PSR mocks returning {"ok":true}
         $stream = $this->createMock(StreamInterface::class);
         $stream->method('__toString')
             ->willReturn('{"ok":true}');
@@ -55,16 +56,19 @@ final class HttpClientTest extends TestCase
             streamFactory: $streamFactory,
         );
 
+        // WHEN: get is called with params
         $result = $httpClient->get('/messages/sendText', [
             'chatId' => '123',
             'text' => 'hello',
         ]);
 
+        // THEN: decoded JSON is returned
         $this->assertSame(['ok' => true], $result);
     }
 
     public function testGetFiltersNullParams(): void
     {
+        // GIVEN: PSR mocks returning success
         $stream = $this->createMock(StreamInterface::class);
         $stream->method('__toString')->willReturn('{"ok":true}');
 
@@ -81,6 +85,7 @@ final class HttpClientTest extends TestCase
         $requestFactory->expects($this->once())
             ->method('createRequest')
             ->with('GET', $this->callback(function (string $url): bool {
+                // THEN: null param is not in URL
                 $this->assertStringNotContainsString('replyMsgId', $url);
                 return true;
             }))
@@ -96,6 +101,7 @@ final class HttpClientTest extends TestCase
             streamFactory: $streamFactory,
         );
 
+        // WHEN: get is called with a null param
         $httpClient->get('/messages/sendText', [
             'chatId' => '123',
             'replyMsgId' => null,
@@ -104,6 +110,7 @@ final class HttpClientTest extends TestCase
 
     public function testGetAlwaysAddsToken(): void
     {
+        // GIVEN: PSR mocks
         $stream = $this->createMock(StreamInterface::class);
         $stream->method('__toString')->willReturn('{}');
 
@@ -120,6 +127,7 @@ final class HttpClientTest extends TestCase
         $requestFactory->expects($this->once())
             ->method('createRequest')
             ->with('GET', $this->callback(function (string $url): bool {
+                // THEN: token is in URL
                 $this->assertStringContainsString('token=my-secret', $url);
                 return true;
             }))
@@ -135,11 +143,13 @@ final class HttpClientTest extends TestCase
             streamFactory: $streamFactory,
         );
 
+        // WHEN: get is called without extra params
         $httpClient->get('/self/get');
     }
 
     public function testGetDoesNotFilterNullString(): void
     {
+        // GIVEN: PSR mocks
         $stream = $this->createMock(StreamInterface::class);
         $stream->method('__toString')->willReturn('{"ok":true}');
 
@@ -156,6 +166,7 @@ final class HttpClientTest extends TestCase
         $requestFactory->expects($this->once())
             ->method('createRequest')
             ->with('GET', $this->callback(function (string $url): bool {
+                // THEN: string "null" is preserved in URL
                 $this->assertStringContainsString('stringParam=null', $url);
                 return true;
             }))
@@ -171,6 +182,7 @@ final class HttpClientTest extends TestCase
             streamFactory: $streamFactory,
         );
 
+        // WHEN: get is called with string "null" param
         $httpClient->get('/messages/sendText', [
             'chatId' => '123',
             'stringParam' => 'null',
@@ -179,6 +191,7 @@ final class HttpClientTest extends TestCase
 
     public function testFilterParamsRemovesNullButKeepsOtherFalsyValues(): void
     {
+        // GIVEN: PSR mocks
         $stream = $this->createMock(StreamInterface::class);
         $stream->method('__toString')->willReturn('{"ok":true}');
 
@@ -197,10 +210,8 @@ final class HttpClientTest extends TestCase
             ->with('GET', $this->callback(function (string $url): bool {
                 parse_str(parse_url($url, PHP_URL_QUERY), $query);
 
-                // null values must be filtered out
+                // THEN: null is filtered, falsy non-null values are preserved
                 $this->assertArrayNotHasKey('nullParam', $query);
-
-                // falsy but non-null values must be preserved
                 $this->assertArrayHasKey('emptyString', $query);
                 $this->assertSame('', $query['emptyString']);
                 $this->assertArrayHasKey('zero', $query);
@@ -223,6 +234,7 @@ final class HttpClientTest extends TestCase
             streamFactory: $streamFactory,
         );
 
+        // WHEN: get is called with mixed null and falsy params
         $httpClient->get('/test', [
             'nullParam' => null,
             'emptyString' => '',
@@ -234,6 +246,7 @@ final class HttpClientTest extends TestCase
 
     public function testPostMultipartThrowsWhenFileNotFound(): void
     {
+        // GIVEN: an HttpClient instance
         $streamFactory = $this->createMock(StreamFactoryInterface::class);
         $requestFactory = $this->createMock(RequestFactoryInterface::class);
         $psrClient = $this->createMock(ClientInterface::class);
@@ -246,14 +259,17 @@ final class HttpClientTest extends TestCase
             streamFactory: $streamFactory,
         );
 
+        // THEN: exception is expected
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('File not found: /nonexistent/file.txt');
 
+        // WHEN: postMultipart is called with non-existent file
         $httpClient->postMultipart('/upload', [], '/nonexistent/file.txt');
     }
 
     public function testGetThrowsOnClientError(): void
     {
+        // GIVEN: PSR mocks returning 401
         $stream = $this->createMock(StreamInterface::class);
         $stream->method('__toString')->willReturn('{"description":"Invalid token"}');
 
@@ -279,14 +295,17 @@ final class HttpClientTest extends TestCase
             streamFactory: $streamFactory,
         );
 
+        // THEN: RuntimeException is expected
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('VK Teams API error: HTTP 401');
 
+        // WHEN: get is called
         $httpClient->get('/self/get');
     }
 
     public function testGetThrowsOnServerError(): void
     {
+        // GIVEN: PSR mocks returning 500
         $stream = $this->createMock(StreamInterface::class);
         $stream->method('__toString')->willReturn('Internal Server Error');
 
@@ -312,9 +331,11 @@ final class HttpClientTest extends TestCase
             streamFactory: $streamFactory,
         );
 
+        // THEN: RuntimeException is expected
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('VK Teams API error: HTTP 500 — Internal Server Error');
 
+        // WHEN: get is called
         $httpClient->get('/messages/sendText');
     }
 }
