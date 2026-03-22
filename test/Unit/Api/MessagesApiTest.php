@@ -309,7 +309,7 @@ final class MessagesApiTest extends TestCase
     }
 
     /**
-     * @return iterable<string, array{Keyboard|list<list<array{text: string, callbackData?: string}>>}>
+     * @return iterable<string, array{Keyboard}>
      */
     public static function keyboardProvider(): iterable
     {
@@ -317,12 +317,12 @@ final class MessagesApiTest extends TestCase
         $keyboard->addButton(new Button('btn', callbackData: 'cb'));
         yield 'Keyboard object' => [$keyboard];
 
-        yield 'raw array' => [[[['text' => 'btn', 'callbackData' => 'cb']]]];
+        yield 'Keyboard::fromArray' => [Keyboard::fromArray([[['text' => 'btn', 'callbackData' => 'cb']]])];
     }
 
     #[DataProvider('keyboardProvider')]
     public function testSendTextKeyboardSerialization(
-        Keyboard|array $keyboard,
+        Keyboard $keyboard,
     ): void {
         $this->api->sendText('chat1', 'hello', inlineKeyboardMarkup: $keyboard);
 
@@ -334,7 +334,7 @@ final class MessagesApiTest extends TestCase
 
     #[DataProvider('keyboardProvider')]
     public function testSendFileKeyboardSerialization(
-        Keyboard|array $keyboard,
+        Keyboard $keyboard,
     ): void {
         $this->api->sendFile(chatId: 'chat1', fileId: 'f1', inlineKeyboardMarkup: $keyboard);
 
@@ -346,7 +346,7 @@ final class MessagesApiTest extends TestCase
 
     #[DataProvider('keyboardProvider')]
     public function testSendVoiceKeyboardSerialization(
-        Keyboard|array $keyboard,
+        Keyboard $keyboard,
     ): void {
         $this->api->sendVoice(chatId: 'chat1', fileId: 'v1', inlineKeyboardMarkup: $keyboard);
 
@@ -358,7 +358,7 @@ final class MessagesApiTest extends TestCase
 
     #[DataProvider('keyboardProvider')]
     public function testEditTextKeyboardSerialization(
-        Keyboard|array $keyboard,
+        Keyboard $keyboard,
     ): void {
         $this->api->editText('chat1', 1, 'text', inlineKeyboardMarkup: $keyboard);
 
