@@ -261,4 +261,26 @@ final class ChatsApiTest extends TestCase
         $this->assertSame('/v1/chats/setRules', $this->httpClientSpy->calls[0][1]);
         $this->assertSame('Be nice', $this->httpClientSpy->calls[0][2]['rules']);
     }
+
+    public function testPinMessage(): void
+    {
+        // WHEN: pinMessage is called
+        $this->api->pinMessage('group1', 42);
+
+        // THEN: correct path and params are sent
+        [$method, $path, $params] = $this->httpClientSpy->calls[0];
+        $this->assertSame('get', $method);
+        $this->assertSame('/v1/chats/pinMessage', $path);
+        $this->assertSame('group1', $params['groupOrChannelId']);
+        $this->assertSame(42, $params['msgId']);
+    }
+
+    public function testUnpinMessage(): void
+    {
+        // WHEN: unpinMessage is called
+        $this->api->unpinMessage('group1', 42);
+
+        // THEN: correct path is used
+        $this->assertSame('/v1/chats/unpinMessage', $this->httpClientSpy->calls[0][1]);
+    }
 }
