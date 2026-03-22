@@ -37,11 +37,27 @@ final class Keyboard implements \JsonSerializable
     public static function fromArray(
         array $rows,
     ): self {
+        if ($rows === []) {
+            throw new \InvalidArgumentException('Keyboard rows must not be empty');
+        }
+
         $keyboard = new self();
 
-        foreach ($rows as $row) {
+        foreach ($rows as $rowIndex => $row) {
+            if (!\is_array($row) || $row === []) {
+                throw new \InvalidArgumentException("Row #{$rowIndex} must be a non-empty array of buttons");
+            }
+
             $buttons = [];
-            foreach ($row as $buttonData) {
+            foreach ($row as $buttonIndex => $buttonData) {
+                if (!\is_array($buttonData)) {
+                    throw new \InvalidArgumentException("Button #{$buttonIndex} in row #{$rowIndex} must be an array");
+                }
+
+                if (!isset($buttonData['text']) || !\is_string($buttonData['text'])) {
+                    throw new \InvalidArgumentException("Button #{$buttonIndex} in row #{$rowIndex} must have a string 'text' key");
+                }
+
                 $buttons[] = new Button(
                     text: $buttonData['text'],
                     url: $buttonData['url'] ?? null,
