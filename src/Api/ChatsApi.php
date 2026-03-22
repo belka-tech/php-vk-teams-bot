@@ -324,4 +324,36 @@ final readonly class ChatsApi
             'rules' => $rules,
         ]);
     }
+
+    /**
+     * @return array{ok: bool}
+     *
+     * @throws ClientExceptionInterface
+     */
+    public function pinMessage(
+        string $groupOrChannelId,
+        string|int $msgId,
+    ): array {
+        /** @phpstan-ignore return.type */
+        return $this->httpClient->get('/v1/chats/pinMessage', [
+            'groupOrChannelId' => $groupOrChannelId,
+            'msgId' => $msgId,
+        ]);
+    }
+
+    /**
+     * @return array{ok: bool}
+     *
+     * @throws ClientExceptionInterface
+     */
+    public function unpinMessage(
+        string $groupOrChannelId,
+        string|int $msgId,
+    ): array {
+        /** @phpstan-ignore return.type */
+        return $this->httpClient->get('/v1/chats/unpinMessage', [
+            'groupOrChannelId' => $groupOrChannelId,
+            'msgId' => $msgId,
+        ]);
+    }
 }

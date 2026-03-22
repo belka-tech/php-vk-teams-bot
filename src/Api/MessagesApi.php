@@ -194,58 +194,6 @@ final readonly class MessagesApi
     }
 
     /**
-     * @return array{ok: bool}
-     *
-     * @throws ClientExceptionInterface
-     */
-    public function pinMessage(
-        string $groupOrChannelId,
-        string|int $msgId,
-    ): array {
-        /** @phpstan-ignore return.type */
-        return $this->httpClient->get('/v1/chats/pinMessage', [
-            'groupOrChannelId' => $groupOrChannelId,
-            'msgId' => $msgId,
-        ]);
-    }
-
-    /**
-     * @return array{ok: bool}
-     *
-     * @throws ClientExceptionInterface
-     */
-    public function unpinMessage(
-        string $groupOrChannelId,
-        string|int $msgId,
-    ): array {
-        /** @phpstan-ignore return.type */
-        return $this->httpClient->get('/v1/chats/unpinMessage', [
-            'groupOrChannelId' => $groupOrChannelId,
-            'msgId' => $msgId,
-        ]);
-    }
-
-    /**
-     * @return array{
-     *     ok: bool,
-     *     type: string,
-     *     size: int,
-     *     filename: string,
-     *     url: string,
-     * }
-     *
-     * @throws ClientExceptionInterface
-     */
-    public function filesGetInfo(
-        string $fileId,
-    ): array {
-        /** @phpstan-ignore return.type */
-        return $this->httpClient->get('/v1/files/getInfo', [
-            'fileId' => $fileId,
-        ]);
-    }
-
-    /**
      * @param list<string|int>|null $forwardMsgId
      * @return array{
      *     ok: bool,

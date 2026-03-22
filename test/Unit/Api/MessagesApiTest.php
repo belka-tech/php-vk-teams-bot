@@ -307,39 +307,7 @@ final class MessagesApiTest extends TestCase
         $this->assertNull($params['url']);
     }
 
-    public function testPinMessage(): void
-    {
-        // WHEN: pinMessage is called
-        $this->api->pinMessage('group1', 42);
 
-        // THEN: correct path and params are sent
-        [$method, $path, $params] = $this->httpClientSpy->calls[0];
-        $this->assertSame('get', $method);
-        $this->assertSame('/v1/chats/pinMessage', $path);
-        $this->assertSame('group1', $params['groupOrChannelId']);
-        $this->assertSame(42, $params['msgId']);
-    }
-
-    public function testUnpinMessage(): void
-    {
-        // WHEN: unpinMessage is called
-        $this->api->unpinMessage('group1', 42);
-
-        // THEN: correct path is used
-        $this->assertSame('/v1/chats/unpinMessage', $this->httpClientSpy->calls[0][1]);
-    }
-
-    public function testFilesGetInfo(): void
-    {
-        // WHEN: filesGetInfo is called
-        $this->api->filesGetInfo('file123');
-
-        // THEN: correct path and fileId are sent
-        [$method, $path, $params] = $this->httpClientSpy->calls[0];
-        $this->assertSame('get', $method);
-        $this->assertSame('/v1/files/getInfo', $path);
-        $this->assertSame('file123', $params['fileId']);
-    }
 
     // --- Data providers ---
 
