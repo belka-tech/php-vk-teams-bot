@@ -8,7 +8,6 @@ use BelkaTech\VkTeamsBot\Bot;
 use BelkaTech\VkTeamsBot\BotEventListener;
 use BelkaTech\VkTeamsBot\Event\EventDto;
 use BelkaTech\VkTeamsBot\Http\HttpClient;
-use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -19,7 +18,7 @@ final class BotEventListenerTest extends TestCase
         $bot = new Bot($this->createMock(HttpClient::class));
         $listener = new BotEventListener($bot);
 
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('pollTime must be between 1 and 60');
 
         $listener->listen(0);
@@ -30,7 +29,7 @@ final class BotEventListenerTest extends TestCase
         $bot = new Bot($this->createMock(HttpClient::class));
         $listener = new BotEventListener($bot);
 
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('pollTime must be between 1 and 60');
 
         $listener->listen(61);
@@ -69,7 +68,7 @@ final class BotEventListenerTest extends TestCase
 
         $listener->onCommand('/start', function () {});
 
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage("Command handler for '/start' is already registered");
 
         $listener->onCommand('/start', function () {});

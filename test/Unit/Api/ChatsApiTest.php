@@ -6,6 +6,7 @@ namespace BelkaTech\VkTeamsBot\Test\Unit\Api;
 
 use BelkaTech\VkTeamsBot\Api\ChatsApi;
 use BelkaTech\VkTeamsBot\Test\Spy\HttpClientSpy;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 final class ChatsApiTest extends TestCase
@@ -166,12 +167,22 @@ final class ChatsApiTest extends TestCase
         $this->assertArrayNotHasKey('userId', $params);
     }
 
-    public function testResolvePendingThrowsWithoutUserIdOrEveryone(): void
+    /**
+     * @return iterable<string, array{?string, ?bool}>
+     */
+    public static function invalidResolvePendingParamsProvider(): iterable
     {
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('userId or everyone must be provided');
+        yield 'both null' => [null, null];
+        yield 'both provided' => ['user1', true];
+    }
 
-        $this->api->resolvePending('chat1', approve: true);
+    #[DataProvider('invalidResolvePendingParamsProvider')]
+    public function testResolvePendingThrowsOnInvalidParams(?string $userId, ?bool $everyone): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Exactly one of userId or everyone must be provided');
+
+        $this->api->resolvePending('chat1', approve: true, userId: $userId, everyone: $everyone);
     }
 
     public function testSetTitle(): void

@@ -62,6 +62,12 @@ final class HttpClient
         $query = http_build_query($this->filterParams($params));
         $url = $this->baseUri . $path . '?' . $query;
 
+        if (!is_file($filePath)) {
+            throw new \InvalidArgumentException(
+                "File not found: {$filePath}",
+            );
+        }
+
         $boundary = bin2hex(random_bytes(16));
 
         $body = "--{$boundary}\r\n"

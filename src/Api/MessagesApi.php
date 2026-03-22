@@ -104,6 +104,10 @@ final readonly class MessagesApi
         ?array $forwardMsgId = null,
         ?Keyboard $inlineKeyboardMarkup = null,
     ): array {
+        if (!($fileId === null xor $filePath === null)) {
+            throw new \InvalidArgumentException('Exactly one of fileId or filePath must be provided');
+        }
+
         $params = [
             'chatId' => $chatId,
             'fileId' => $fileId,
@@ -264,6 +268,10 @@ final readonly class MessagesApi
         ?object $format,
         ?ParseModeEnum $parseMode,
     ): array {
+        if (!($fileId === null xor $filePath === null)) {
+            throw new \InvalidArgumentException('Exactly one of fileId or filePath must be provided');
+        }
+
         $params = [
             'chatId' => $chatId,
             'caption' => $caption,

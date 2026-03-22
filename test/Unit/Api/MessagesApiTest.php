@@ -85,6 +85,24 @@ final class MessagesApiTest extends TestCase
         $this->assertNotSame('null', $params['inlineKeyboardMarkup']);
     }
 
+    /**
+     * @return iterable<string, array{?string, ?string}>
+     */
+    public static function invalidFileParamsProvider(): iterable
+    {
+        yield 'both null' => [null, null];
+        yield 'both provided' => ['abc', '/tmp/file.txt'];
+    }
+
+    #[DataProvider('invalidFileParamsProvider')]
+    public function testSendFileThrowsOnInvalidFileParams(?string $fileId, ?string $filePath): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Exactly one of fileId or filePath must be provided');
+
+        $this->api->sendFile(chatId: 'chat1', fileId: $fileId, filePath: $filePath);
+    }
+
     public function testSendFileWithFileIdUsesGet(): void
     {
         $this->api->sendFile(chatId: 'chat1', fileId: 'abc');
@@ -112,6 +130,15 @@ final class MessagesApiTest extends TestCase
 
         $params = $this->httpClientSpy->calls[0][2];
         $this->assertSame('my file', $params['caption']);
+    }
+
+    #[DataProvider('invalidFileParamsProvider')]
+    public function testSendVoiceThrowsOnInvalidFileParams(?string $fileId, ?string $filePath): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Exactly one of fileId or filePath must be provided');
+
+        $this->api->sendVoice(chatId: 'chat1', fileId: $fileId, filePath: $filePath);
     }
 
     public function testSendVoiceWithFileIdUsesGet(): void
