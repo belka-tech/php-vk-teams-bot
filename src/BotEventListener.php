@@ -153,29 +153,7 @@ final class BotEventListener
                 );
 
                 try {
-                    if ($eventType === EventTypeEnum::MessageNew) {
-                        $text = isset($event['payload']['text']) && is_string($event['payload']['text'])
-                            ? $event['payload']['text']
-                            : '';
-
-                        foreach ($this->commandHandlers as $command => $handler) {
-                            if (
-                                $text === $command
-                                || str_starts_with($text, $command . ' ')
-                                || str_starts_with($text, $command . '@')
-                            ) {
-                                $handler($this->bot, $eventDto);
-
-                                continue 2;
-                            }
-                        }
-                    }
-
-                    if (array_key_exists($eventType->value, $this->handlers)) {
-                        foreach ($this->handlers[$eventType->value] as $handler) {
-                            $handler($this->bot, $eventDto);
-                        }
-                    }
+                    $this->handleEvent($eventDto);
                 } catch (\Exception $e) {
                     if ($onException === null) {
                         throw $e;
@@ -185,6 +163,48 @@ final class BotEventListener
                 }
             }
         }
+    }
+
+    private function handleEvent(
+        EventDto $event,
+    ): void {
+        if ($event->type === EventTypeEnum::MessageNew) {
+            $text = isset($event->payload['text']) && is_string($event->payload['text'])
+                ? $event->payload['text']
+                : '';
+
+            $commandHandler = $this->matchCommand($text);
+            if ($commandHandler !== null) {
+                $commandHandler($this->bot, $event);
+
+                return;
+            }
+        }
+
+        if (array_key_exists($event->type->value, $this->handlers)) {
+            foreach ($this->handlers[$event->type->value] as $handler) {
+                $handler($this->bot, $event);
+            }
+        }
+    }
+
+    /**
+     * @return (\Closure(Bot, EventDto): void)|null
+     */
+    private function matchCommand(
+        string $text,
+    ): ?\Closure {
+        foreach ($this->commandHandlers as $command => $handler) {
+            if (
+                $text === $command
+                || str_starts_with($text, $command . ' ')
+                || str_starts_with($text, $command . '@')
+            ) {
+                return $handler;
+            }
+        }
+
+        return null;
     }
 
     /**
