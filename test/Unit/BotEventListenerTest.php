@@ -219,6 +219,145 @@ final class BotEventListenerTest extends TestCase
         $listener->listen(1);
     }
 
+    public function testStopFromHandlerStopsLoop(): void
+    {
+        $httpClient = $this->createMock(HttpClient::class);
+        $bot = new Bot($httpClient);
+        $listener = new BotEventListener($bot);
+
+        $pollCount = 0;
+        $httpClient
+            ->method('get')
+            ->willReturnCallback(function () use (&$pollCount, $listener) {
+                $pollCount++;
+                return [
+                    'events' => [
+                        [
+                            'eventId' => $pollCount,
+                            'type' => 'newMessage',
+                            'payload' => ['text' => 'msg'],
+                        ],
+                    ],
+                ];
+            });
+
+        $listener->onMessage(function (Bot $bot, EventDto $event) use ($listener) {
+            if ($event->eventId === 2) {
+                $listener->stop();
+            }
+        });
+
+        $listener->listen(1);
+
+        $this->assertSame(2, $pollCount, 'Loop should stop after handler calls stop()');
+    }
+
+    public function testUnknownEventTypeIsSkipped(): void
+    {
+        $httpClient = $this->createMock(HttpClient::class);
+        $bot = new Bot($httpClient);
+        $listener = new BotEventListener($bot);
+
+        $callCount = 0;
+        $this->mockEventsGet($httpClient, $listener, $callCount, [
+            'events' => [
+                [
+                    'eventId' => 1,
+                    'type' => 'unknownEventType',
+                    'payload' => ['text' => 'hello'],
+                ],
+                [
+                    'eventId' => 2,
+                    'type' => 'newMessage',
+                    'payload' => ['text' => 'world'],
+                ],
+            ],
+        ]);
+
+        $receivedEvents = [];
+        $listener->onMessage(function (Bot $bot, EventDto $event) use (&$receivedEvents) {
+            $receivedEvents[] = $event->eventId;
+        });
+
+        $listener->listen(1);
+
+        $this->assertSame([2], $receivedEvents, 'Unknown event should be skipped, known event processed');
+    }
+
+    public function testLastEventIdIsPassedToNextPoll(): void
+    {
+        $httpClient = $this->createMock(HttpClient::class);
+        $bot = new Bot($httpClient);
+        $listener = new BotEventListener($bot);
+
+        $receivedLastEventIds = [];
+        $pollCount = 0;
+        $httpClient
+            ->method('get')
+            ->willReturnCallback(function (string $path, array $params) use (&$receivedLastEventIds, &$pollCount, $listener) {
+                $receivedLastEventIds[] = $params['lastEventId'];
+                $pollCount++;
+                if ($pollCount === 1) {
+                    return [
+                        'events' => [
+                            ['eventId' => 42, 'type' => 'newMessage', 'payload' => ['text' => 'hi']],
+                        ],
+                    ];
+                }
+                $listener->stop();
+                return ['events' => []];
+            });
+
+        $listener->onMessage(function () {});
+        $listener->listen(1);
+
+        $this->assertSame(0, $receivedLastEventIds[0], 'First poll should use lastEventId=0');
+        $this->assertSame(42, $receivedLastEventIds[1], 'Second poll should use lastEventId from previous batch');
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('signalProvider')]
+    public function testStopOnSignal(int $signal): void
+    {
+        if (!function_exists('pcntl_signal')) {
+            $this->markTestSkipped('pcntl extension required');
+        }
+
+        $httpClient = $this->createMock(HttpClient::class);
+        $bot = new Bot($httpClient);
+        $listener = new BotEventListener($bot);
+
+        $pollCount = 0;
+        $httpClient
+            ->method('get')
+            ->willReturnCallback(function () use (&$pollCount, $signal) {
+                $pollCount++;
+                if ($pollCount === 1) {
+                    posix_kill(posix_getpid(), $signal);
+                    return [
+                        'events' => [
+                            ['eventId' => 1, 'type' => 'newMessage', 'payload' => ['text' => 'hi']],
+                        ],
+                    ];
+                }
+                $this->fail('Loop should have stopped after signal');
+                return ['events' => []];
+            });
+
+        $listener->onMessage(function () {});
+        $listener->listen(1);
+
+        $this->assertSame(1, $pollCount, 'Loop should stop after signal');
+    }
+
+    /**
+     * @return iterable<string, array{int}>
+     */
+    public static function signalProvider(): iterable
+    {
+        yield 'SIGTERM' => [SIGTERM];
+        yield 'SIGINT' => [SIGINT];
+    }
+
     /**
      * Configure HttpClient mock to return $eventsBatch on first call,
      * then empty events + stop() on subsequent calls.
