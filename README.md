@@ -223,7 +223,7 @@ You can also specify `parseMode` for an individual message:
 ```php
 $bot->messages->sendText(
     chatId: '123456',
-    text: '*bold*',
+    text: '**bold**',
     parseMode: \BelkaTech\VkTeamsBot\Enum\ParseModeEnum::MarkdownV2,
 );
 ```
