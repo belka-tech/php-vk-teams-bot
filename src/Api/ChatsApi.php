@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace BelkaTech\VkTeamsBot\Api;
 
 use BelkaTech\VkTeamsBot\Http\HttpClient;
-use Exception;
 use Psr\Http\Client\ClientExceptionInterface;
 
 final readonly class ChatsApi
@@ -233,7 +232,6 @@ final readonly class ChatsApi
      * @return array{ok: bool}
      *
      * @throws ClientExceptionInterface
-     * @throws Exception
      */
     public function resolvePending(
         string $chatId,
@@ -241,6 +239,10 @@ final readonly class ChatsApi
         ?string $userId = null,
         ?bool $everyone = null,
     ): array {
+        if (!($userId === null xor $everyone === null)) {
+            throw new \InvalidArgumentException('Exactly one of userId or everyone must be provided');
+        }
+
         if ($userId !== null) {
             /** @phpstan-ignore return.type */
             return $this->httpClient->get('/v1/chats/resolvePending', [
@@ -250,16 +252,12 @@ final readonly class ChatsApi
             ]);
         }
 
-        if ($everyone !== null) {
-            /** @phpstan-ignore return.type */
-            return $this->httpClient->get('/v1/chats/resolvePending', [
-                'chatId' => $chatId,
-                'approve' => $approve,
-                'everyone' => $everyone,
-            ]);
-        }
-
-        throw new Exception('userId or everyone must be provided');
+        /** @phpstan-ignore return.type */
+        return $this->httpClient->get('/v1/chats/resolvePending', [
+            'chatId' => $chatId,
+            'approve' => $approve,
+            'everyone' => $everyone,
+        ]);
     }
 
     /**

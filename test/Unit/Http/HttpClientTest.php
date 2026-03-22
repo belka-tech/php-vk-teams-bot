@@ -232,6 +232,26 @@ final class HttpClientTest extends TestCase
         ]);
     }
 
+    public function testPostMultipartThrowsWhenFileNotFound(): void
+    {
+        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+        $requestFactory = $this->createMock(RequestFactoryInterface::class);
+        $psrClient = $this->createMock(ClientInterface::class);
+
+        $httpClient = new HttpClient(
+            baseUri: 'https://api.example.com',
+            token: 'test-token',
+            client: $psrClient,
+            requestFactory: $requestFactory,
+            streamFactory: $streamFactory,
+        );
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('File not found: /nonexistent/file.txt');
+
+        $httpClient->postMultipart('/upload', [], '/nonexistent/file.txt');
+    }
+
     public function testGetThrowsOnClientError(): void
     {
         $stream = $this->createMock(StreamInterface::class);

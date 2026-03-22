@@ -34,7 +34,13 @@ $bot = new \BelkaTech\VkTeamsBot\Bot(
     new \BelkaTech\VkTeamsBot\Http\HttpClient(
         baseUri: 'https://api.icq.net/bot',
         token: 'YOUR_BOT_TOKEN',
-        client: new \GuzzleHttp\Client(),
+        client: new \GuzzleHttp\Client(
+            [
+                'connect_timeout' => 4,
+                'timeout' => 15,
+                'http_errors' => false,
+            ],
+        ),
         requestFactory: new \GuzzleHttp\Psr7\HttpFactory(),
         streamFactory: new \GuzzleHttp\Psr7\HttpFactory(),
     ),

@@ -6,7 +6,6 @@ namespace BelkaTech\VkTeamsBot;
 
 use BelkaTech\VkTeamsBot\Enum\EventTypeEnum;
 use BelkaTech\VkTeamsBot\Event\EventDto;
-use InvalidArgumentException;
 use Psr\Http\Client\NetworkExceptionInterface;
 
 final class BotEventListener
@@ -32,7 +31,7 @@ final class BotEventListener
         \Closure $handler,
     ): void {
         if (isset($this->commandHandlers[$command])) {
-            throw new InvalidArgumentException(
+            throw new \InvalidArgumentException(
                 "Command handler for '{$command}' is already registered",
             );
         }
@@ -126,7 +125,7 @@ final class BotEventListener
         ?\Closure $onException = null,
     ): void {
         if ($pollTime < 1 || $pollTime > 60) {
-            throw new InvalidArgumentException(
+            throw new \InvalidArgumentException(
                 "pollTime must be between 1 and 60 seconds, got {$pollTime}",
             );
         }
