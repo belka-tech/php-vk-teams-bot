@@ -130,7 +130,7 @@ final class BotEventListener
             );
         }
 
-        if (function_exists('pcntl_signal')) {
+        if (function_exists('pcntl_signal') && function_exists('pcntl_async_signals')) {
             pcntl_async_signals(true);
             pcntl_signal(SIGTERM, fn() => $this->stop());
             pcntl_signal(SIGINT, fn() => $this->stop());
